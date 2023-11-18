@@ -22,9 +22,9 @@ public:
 private:
   // const char *ssid = "ESP32_CAM";
   // const char *password = "elegoo2020";
-  char *ssid = "ELEGOO-";
+  // char *ssid = "CP";
   //char *password = "elegoo2020";
-  char *password = "";
+  // char *password = "3MesesParaTenerInternetEnCasa";
 };
 
 #endif

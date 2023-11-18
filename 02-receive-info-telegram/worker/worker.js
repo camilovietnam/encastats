@@ -57,19 +57,22 @@ export default {
     },
 
     async returnState() {
-        await this.sendTelegramMessage(`The rover is: ${this.state}.`);
+        const currentTime = new Date().toLocaleString();
+        await this.sendTelegramMessage(`The rover is: ${this.state}. [${currentTime}]`);
         return jsonResponse({"state": this.state, "message": `The rover is: ${this.state}`});
     },
 
     async turnOn() {
         this.state = "on";
-        await this.sendTelegramMessage("The rover was turned on.");
+        const currentTime = new Date().toLocaleString();
+        await this.sendTelegramMessage(`The rover was turned on [at ${currentTime}]`);
         return jsonResponse({"state": this.state, "message": "The rover was turned on"});
     },
 
     async turnOff() {
         this.state = "off";
-        await this.sendTelegramMessage("The rover was turned off.");
+        const currentTime = new Date().toLocaleString();
+        await this.sendTelegramMessage(`The rover was turned off [at ${currentTime}]`);
         return jsonResponse({"state:": this.state, "message": "The rover was turned off"});
     },
 

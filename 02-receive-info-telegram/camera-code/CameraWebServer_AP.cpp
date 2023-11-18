@@ -36,9 +36,48 @@
 #include "CameraWebServer_AP.h"
 #include "camera_pins.h"
 #include "esp_system.h"
+#include "credentials.h"
+
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+#include <iostream>
+#include <sstream>
+#include <string>
 
 // #include "BLEAdvertisedDevice.h"
 // BLEAdvertisedDevice _BLEAdvertisedDevice;
+
+void sendTurnOnRequest() {
+  HTTPClient http;
+  std::ostringstream requestBodyStream;
+
+  requestBodyStream << "{\"message\":{\"chat\":{\"id\":" << TELEGRAM_CHAT_ID << "},\"text\":\"turn on\"}}";
+
+  Serial.println("Calling URL:");
+  Serial.print(requestBodyStream.str().c_str());
+
+    // Get the concatenated string
+  std::string requestBody = requestBodyStream.str();
+
+  http.begin(CLOUDFLARE_WORKER_URL);
+  http.addHeader("Content-Type", "application/json");
+
+  int httpResponseCode = http.POST(requestBody.c_str());
+
+  if (httpResponseCode > 0) {
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+
+    String response = http.getString();
+    Serial.println(response);
+  } else {
+    Serial.print("HTTP Request failed. Error code: ");
+    Serial.println(httpResponseCode);
+  }
+
+  http.end();
+}
 
 void startCameraServer();
 void CameraWebServer_AP::CameraWebServer_AP_Init(void)
@@ -113,7 +152,7 @@ void CameraWebServer_AP::CameraWebServer_AP_Init(void)
   String mac0_default = String(string);
   sprintf(string, "%08X", (uint32_t)chipid);
   String mac1_default = String(string);
-  String url = ssid + mac0_default + mac1_default;
+  String url = SSID + mac0_default + mac1_default;
   const char *mac_default = url.c_str();
 
   Serial.println(":----------------------------:");
@@ -122,18 +161,10 @@ void CameraWebServer_AP::CameraWebServer_AP_Init(void)
   Serial.println(":----------------------------:");
   wifi_name = mac0_default + mac1_default;
 
-  // WiFi.setTxPower(WIFI_POWER_19_5dBm);
-  // WiFi.mode(WIFI_AP);
-  // WiFi.softAP(mac_default, password, 9);
+  WiFi.begin(SSID, PASSWORD);
 
-  // todo: move this outside of the class
-  const char* ssid = "CP";
-  const char* password = "3MesesParaTenerInternetEnCasa";
-
-  WiFi.begin(ssid, password);
-
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+  Serial.print("Connecting to SSID: ");
+  Serial.println(SSID);
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(666);
@@ -144,9 +175,11 @@ void CameraWebServer_AP::CameraWebServer_AP_Init(void)
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
 
+  sendTurnOnRequest();
   startCameraServer();
 
-  Serial.print("Camera Ready! Use 'http://");
+  Serial.print("Camera server is ready! Use 'http://");
   Serial.print(WiFi.localIP());
   Serial.println("' to connect");
 }
+
