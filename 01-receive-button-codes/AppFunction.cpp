@@ -7,6 +7,7 @@
 #include <string.h>
 #include "AppFunction.h"
 #include "Driver.h"
+#include "Motor.h"
 
 // #include "ArduinoJson-v6.11.1.h" //ArduinoJson
 
@@ -29,7 +30,22 @@ Driver MyDriver;
 //     CarModes Car_Mode;
 // };
 
+enum ButtonCommands
+{ 
+    Forward = 1,   //(1)
+    Backward,      //(2)
+    Left,          //(3)
+    Right,         //(4)
+    Stop,           //(9)
+    LeftForward,   //(5)
+    LeftBackward,  //(6)
+    RightForward,  //(7)
+    RightBackward, //(8)
+};
+
 // Application ElegooCar;
+Motor AppMotor;
+uint8_t speed = 60;
 
 void AppFunction::Init(void) {
     bool res_error = true;
@@ -47,20 +63,64 @@ void AppFunction::Receive(void) {
 
     if (true == data_received) {
         switch (Button_pressed) {
-            case 1:
+            case Forward:
                 Serial.println("Up");
+
+                AppMotor.SetMotorControl(
+                    direction_forward,
+                    speed,
+                    direction_forward,
+                    speed,
+                    control_enable
+                );
                 break;
-            case 2:
+            case Backward:
                 Serial.println("Down");
+
+                AppMotor.SetMotorControl(
+                    direction_backward,
+                    speed,
+                    direction_backward,
+                    speed,
+                    control_enable
+                );
+
                 break;
-            case 3:
+            case Left:
                 Serial.println("Left");
+
+                AppMotor.SetMotorControl(
+                    direction_backward,
+                    speed,
+                    direction_forward,
+                    speed,
+                    control_enable
+                );
+
                 break;
-            case 4:
+            case Right:
                 Serial.println("Right");
+
+                AppMotor.SetMotorControl(
+                    direction_forward,
+                    speed,
+                    direction_backward,
+                    speed,
+                    control_enable
+                );
+
                 break;
-            case 5:
+            case Stop:
                 Serial.println("Ok");
+
+                AppMotor.SetMotorControl(
+                    direction_stop,
+                    0,
+                    direction_stop,
+                    0,
+                    control_enable
+                );
+
                 break;
             case 6:
                 Serial.println("Mode 1");
