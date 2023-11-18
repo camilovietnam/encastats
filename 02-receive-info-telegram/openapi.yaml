@@ -2,42 +2,59 @@ openapi: 3.0.0
 info:
   title: Rover Control API
   description: API for controlling the state of a rover
-  version: 1.0.0
+  version: 1.0.1
 servers:
   - url: 'https://elegua.u1062049.workers.dev'
 paths:
-  /return-state:
-    get:
-      summary: Get Rover State
-      description: Retrieve the current state of the rover.
+  /:
+    post:
+      summary: Process Telegram Message
+      description: Process a Telegram message and return the updated state.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            examples:
+              return-state:
+                summary: "Return the state of the rover"
+                value:
+                  message:
+                    chat:
+                      id: 5654262871
+                    text: "return state"
+              turn-on:
+                summary: "Turn on the rover"
+                value:
+                  message:
+                    chat:
+                      id: 5654262871
+                    text: "turn on"
+              turn-off:
+                summary: "Turn off the rover"
+                value:
+                  message:
+                    chat:
+                      id: 5654262871
+                    text: "turn off"
       responses:
         '200':
           description: Successful response
           content:
             application/json:
-              example:
-                state: 'off'
-  /turn-on:
-    get:
-      summary: Turn On Rover
-      description: Turn on the rover and return the updated state.
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              example:
-                state: 'on'
-                message: 'The rover has been turned on.'
-  /turn-off:
-    get:
-      summary: Turn Off Rover
-      description: Turn off the rover and return the updated state.
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              example:
-                state: 'off'
-                message: 'The rover has been turned off.'
+              examples:
+                return-state:
+                  summary: "Return the state of the rover"
+                  value:
+                    state: 'on'
+                    message: 'The rover is: on'
+                turn-on:
+                  summary: "The rover was turned on"
+                  value:
+                    state: 'on'
+                    message: 'The rover was turned on.'
+                turn-off:
+                  summary: "The rover was turned off"
+                  value:
+                    state: 'on'
+                    message: 'The rover was turned off.'
+
