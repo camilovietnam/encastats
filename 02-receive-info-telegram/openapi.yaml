@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  title: Rover Control API
+  description: API for controlling the state of a rover
+  version: 1.0.0
+servers:
+  - url: 'https://elegua.u1062049.workers.dev'
+paths:
+  /return-state:
+    get:
+      summary: Get Rover State
+      description: Retrieve the current state of the rover.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                state: 'off'
+  /turn-on:
+    get:
+      summary: Turn On Rover
+      description: Turn on the rover and return the updated state.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                state: 'on'
+                message: 'The rover has been turned on.'
+  /turn-off:
+    get:
+      summary: Turn Off Rover
+      description: Turn off the rover and return the updated state.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              example:
+                state: 'off'
+                message: 'The rover has been turned off.'
