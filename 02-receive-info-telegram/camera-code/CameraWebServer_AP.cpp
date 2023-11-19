@@ -45,8 +45,7 @@
 #include <sstream>
 #include <string>
 
-// #include "BLEAdvertisedDevice.h"
-// BLEAdvertisedDevice _BLEAdvertisedDevice;
+
 
 void sendTurnOnRequest() {
   HTTPClient http;
@@ -57,7 +56,41 @@ void sendTurnOnRequest() {
   Serial.println("Calling URL:");
   Serial.print(requestBodyStream.str().c_str());
 
-    // Get the concatenated string
+  http.begin(CLOUDFLARE_WORKER_URL);
+  http.addHeader("Content-Type", "application/json");
+
+  std::string requestBody = requestBodyStream.str();
+  int httpResponseCode = http.POST(requestBody.c_str());
+
+  if (httpResponseCode > 0) {
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+
+    String response = http.getString();
+    Serial.println(response);
+  } else {
+    Serial.print("HTTP Request failed. Error code: ");
+    Serial.println(httpResponseCode);
+  }
+
+  http.end();
+}
+
+
+
+
+void CameraWebServer_AP::PingWorker(void) {
+  HTTPClient http;
+  std::ostringstream requestBodyStream;
+
+  requestBodyStream << "{\"message\":{\"chat\":{\"id\":" << TELEGRAM_CHAT_ID << "},\"text\":\"ping\"}}";
+
+  Serial.print("Calling URL: ");
+  Serial.println(CLOUDFLARE_WORKER_URL);
+  
+  Serial.print(requestBodyStream.str().c_str());
+
+  // Get the concatenated string
   std::string requestBody = requestBodyStream.str();
 
   http.begin(CLOUDFLARE_WORKER_URL);
@@ -101,7 +134,7 @@ void CameraWebServer_AP::CameraWebServer_AP_Init(void)
   config.pin_sscb_scl = SIOC_GPIO_NUM;
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
-  config.xclk_freq_hz = 10000000;//20000000
+  config.xclk_freq_hz = 20000000; // previously: 10000000
   config.pixel_format = PIXFORMAT_JPEG;
   //init with high specs to pre-allocate larger buffers
   if (psramFound())

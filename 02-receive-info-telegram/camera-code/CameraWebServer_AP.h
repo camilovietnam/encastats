@@ -17,14 +17,8 @@ class CameraWebServer_AP
 
 public:
   void CameraWebServer_AP_Init(void);
+  void PingWorker(void);
   String wifi_name;
-
-private:
-  // const char *ssid = "ESP32_CAM";
-  // const char *password = "elegoo2020";
-  // char *ssid = "CP";
-  //char *password = "elegoo2020";
-  // char *password = "3MesesParaTenerInternetEnCasa";
 };
 
 #endif
