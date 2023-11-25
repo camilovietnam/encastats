@@ -107,7 +107,7 @@ void loopModeLearn() {
   unsigned long currentTime = millis();
 
   if (!countingDown) {
-    lastButtonPressed = MyApp.ReceiveCommandFromController(); 
+    lastButtonPressed = MyApp.ReceiveCommandFromController();
 
     if (isModeChange(lastButtonPressed)) {
       Serial.print("Changed mode LEARN -> ");
@@ -117,6 +117,10 @@ void loopModeLearn() {
       modeLoopedAtLeastOnce = false;
       return;
     } else if (isValidMovement(lastButtonPressed)) {
+      startTime = millis();
+      countingDown = true;
+      beginningOfMovement.Reset();
+
       // store the movement in the button history, if there is enough space
       if (historyIndex < maxHistorySize) {
         buttonHistory[historyIndex] = lastButtonPressed;
@@ -126,9 +130,6 @@ void loopModeLearn() {
       } else {
         Serial.println("You used all the memory for buttons. Go to Repeat mode now.");
       }
-
-      startTime = millis();
-      countingDown = true;
     }
   }
 
@@ -136,9 +137,8 @@ void loopModeLearn() {
   switch (lastButtonPressed) {
       case btnForward: 
       case btnBackward:
-        if (currentTime - startTime > delayForLongMovement) {
+        if (beginningOfMovement.HasElapsed(delayForLongMovement)) {
           // stop the car
-          Serial.println("Learn Stop the car 1");
           countingDown = false;
           lastButtonPressed = 100;
           MyApp.StopTheCar();
@@ -146,9 +146,8 @@ void loopModeLearn() {
         break;
       case btnLeft:
       case btnRight:
-        if (currentTime - startTime > delayForShortMovement) {
+        if (beginningOfMovement.HasElapsed(delayForShortMovement)) {
           // stop the car
-          Serial.println("Learn Stop the car 2");
           countingDown = false;
           lastButtonPressed = 100;
           MyApp.StopTheCar();
