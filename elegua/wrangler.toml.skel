@@ -1,0 +1,15 @@
+name = "elegua"
+main = "src/worker.ts"
+compatibility_date = "2023-11-18"
+env = { }
+
+[triggers]
+crons = [ ]
+
+[vars]
+BOT_TOKEN = "6521137204:AAEVThZYum8-bFRp3olOyIZagtsAAzfzyRk"
+CHAT_ID = "5654262871"
+
+[[kv_namespaces]]
+id = "a46b2e69065e443bbdc842660571e5b6"
+binding = "KV_ROVER"
