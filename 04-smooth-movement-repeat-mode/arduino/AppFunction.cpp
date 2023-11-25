@@ -43,53 +43,19 @@ void AppFunction::Init(void) {
 void AppFunction::MoveTheCar(uint8_t movement){
     switch (movement) {
         case btnForward:
-            AppMotor.SetMotorControl(
-                direction_forward,
-                speed,
-                direction_forward,
-                speed,
-                control_enable
-            );
+            AppMotor.GoForward(speed);
             break;
         case btnBackward:
-            AppMotor.SetMotorControl(
-                direction_backward,
-                speed,
-                direction_backward,
-                speed,
-                control_enable
-            );
-
+            AppMotor.GoBackward(speed);
             break;
         case btnLeft:
-            AppMotor.SetMotorControl(
-                direction_backward,
-                speed,
-                direction_forward,
-                speed,
-                control_enable
-            );
-
+            AppMotor.TurnLeft(speed);
             break;
         case btnRight:
-            AppMotor.SetMotorControl(
-                direction_forward,
-                speed,
-                direction_backward,
-                speed,
-                control_enable
-            );
-
+            AppMotor.TurnRight(speed);
             break;
         case btnStop:
-            AppMotor.SetMotorControl(
-                direction_stop,
-                0,
-                direction_stop,
-                0,
-                control_enable
-            );
-
+            AppMotor.Stop();
             break;
         case btnModeFree:
             Serial.println("Mode 1");
@@ -121,83 +87,11 @@ uint8_t AppFunction::ReceiveCommandFromController(void) {
 
     if (true == data_received) {
         MoveTheCar(Button_pressed);
-        // switch (Button_pressed) {
-        //     case btnForward:
-        //         AppMotor.SetMotorControl(
-        //             direction_forward,
-        //             speed,
-        //             direction_forward,
-        //             speed,
-        //             control_enable
-        //         );
-        //         break;
-        //     case btnBackward:
-        //         AppMotor.SetMotorControl(
-        //             direction_backward,
-        //             speed,
-        //             direction_backward,
-        //             speed,
-        //             control_enable
-        //         );
-
-        //         break;
-        //     case btnLeft:
-        //         AppMotor.SetMotorControl(
-        //             direction_backward,
-        //             speed,
-        //             direction_forward,
-        //             speed,
-        //             control_enable
-        //         );
-
-        //         break;
-        //     case btnRight:
-        //         AppMotor.SetMotorControl(
-        //             direction_forward,
-        //             speed,
-        //             direction_backward,
-        //             speed,
-        //             control_enable
-        //         );
-
-        //         break;
-        //     case btnStop:
-        //         AppMotor.SetMotorControl(
-        //             direction_stop,
-        //             0,
-        //             direction_stop,
-        //             0,
-        //             control_enable
-        //         );
-
-        //         break;
-        //     case 6:
-        //         Serial.println("Mode 1");
-        //         break;
-        //     case 7:
-        //         Serial.println("Mode 2");
-        //         break;
-        //     case 8:
-        //         Serial.println("Mode 3");
-        //         break;
-        //     case 9:
-        //         Serial.println("Mode 4");
-        //         break;
-        //     case 10:
-        //         Serial.println("Mode 5");
-        //         break;
-        // }
     }
 
     return Button_pressed;
 }
 
 void AppFunction::StopTheCar(void) {
-    AppMotor.SetMotorControl(
-        direction_stop,
-        0,
-        direction_stop,
-        0,
-        control_enable
-    );
+    AppMotor.Stop();
 }

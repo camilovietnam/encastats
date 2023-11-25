@@ -9,13 +9,11 @@
 class Motor {
     public:
         void Init(void);
-        void SetMotorControl(
-            boolean direction_A,
-            uint8_t speed_A,
-            boolean direction_B,
-            uint8_t speed_B,
-            boolean controlED
-        );
+        void GoForward(uint8_t speed);
+        void GoBackward(uint8_t speed);
+        void TurnLeft(uint8_t speed);
+        void TurnRight(uint8_t speed);
+        void Stop();
 
     private:
 #define PIN_Speed_Motor_A 5
