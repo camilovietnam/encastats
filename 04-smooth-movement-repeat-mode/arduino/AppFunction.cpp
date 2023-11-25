@@ -91,16 +91,16 @@ void AppFunction::MoveTheCar(uint8_t movement){
             );
 
             break;
-        case 6:
+        case btnModeFree:
             Serial.println("Mode 1");
             break;
-        case 7:
+        case bntModeLearn:
             Serial.println("Mode 2");
             break;
-        case 8:
+        case btnModeRepeat:
             Serial.println("Mode 3");
             break;
-        case 9:
+        case Mode4:
             Serial.println("Mode 4");
             break;
         case 10:

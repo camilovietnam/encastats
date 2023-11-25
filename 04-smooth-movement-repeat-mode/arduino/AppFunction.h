@@ -13,10 +13,10 @@ enum ButtonCommands
     btnLeft,          //(3)
     btnRight,         //(4)
     btnStop,           //(9)
-    LeftForward,   //(5)
-    LeftBackward,  //(6)
-    RightForward,  //(7)
-    RightBackward, //(8)
+    btnModeFree,   //(5)
+    bntModeLearn,  //(6)
+    btnModeRepeat,  //(7)
+    Mode4, //(8)
 };
 
 class AppFunction {
