@@ -76,9 +76,9 @@ void sendTurnOnRequest() {
   http.end();
 }
 
-
-
-
+/* * * * * * * * * * * * * * * * * * * * * * */
+/* * *  Ping the worker  * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * */
 void CameraWebServer_AP::PingWorker(void) {
   HTTPClient http;
   std::ostringstream requestBodyStream;
@@ -113,9 +113,10 @@ void CameraWebServer_AP::PingWorker(void) {
 }
 
 void startCameraServer();
-void CameraWebServer_AP::CameraWebServer_AP_Init(void)
-{
+
+camera_config_t CameraWebServer_AP::loadConfig(void) {
   camera_config_t config;
+
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
   config.pin_d0 = Y2_GPIO_NUM;
@@ -149,6 +150,16 @@ void CameraWebServer_AP::CameraWebServer_AP_Init(void)
     config.jpeg_quality = 12;
     config.fb_count = 1;
   }
+
+  return config;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * */
+/* * *  Initialize the Camera Server * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * */
+void CameraWebServer_AP::CameraWebServer_AP_Init(void)
+{
+  camera_config_t config = loadConfig();
 
 #if defined(CAMERA_MODEL_ESP_EYE)
   pinMode(13, INPUT_PULLUP);

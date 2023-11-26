@@ -19,6 +19,7 @@ public:
   void CameraWebServer_AP_Init(void);
   void PingWorker(void);
   String wifi_name;
+  camera_config_t loadConfig(void);
 };
 
 #endif

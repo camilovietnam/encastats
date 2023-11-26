@@ -206,8 +206,9 @@ const unsigned long pingInterval = 5000; // How many milliseconds to wait for ea
 void loop()
 {
   if (millis() - lastPingTime >= pingInterval) {
-    Serial.println("Ping");
-    CameraWebServerAP.PingWorker();
+    // todo: restore ping
+    // Serial.println("Ping");
+    // CameraWebServerAP.PingWorker();
     lastPingTime = millis();
   }
 
