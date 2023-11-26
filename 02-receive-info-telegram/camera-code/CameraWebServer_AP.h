@@ -20,6 +20,7 @@ public:
   void PingWorker(void);
   String wifi_name;
   camera_config_t loadConfig(void);
+  void connectToWifi();
 };
 
 #endif
