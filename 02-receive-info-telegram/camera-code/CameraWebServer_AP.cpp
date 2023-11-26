@@ -46,7 +46,9 @@
 #include <string>
 
 
-
+/* * * * * * * * * * * * * * * * * * * * * * */
+/* * *  Send HTTP Turn On    * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * */
 void sendTurnOnRequest() {
   HTTPClient http;
   std::ostringstream requestBodyStream;
@@ -114,6 +116,9 @@ void CameraWebServer_AP::PingWorker(void) {
 
 void startCameraServer();
 
+/* * * * * * * * * * * * * * * * * * * * * * */
+/* * *  Load the config  * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * */
 camera_config_t CameraWebServer_AP::loadConfig(void) {
   camera_config_t config;
 
@@ -154,6 +159,9 @@ camera_config_t CameraWebServer_AP::loadConfig(void) {
   return config;
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * */
+/* * *  Connect to the wifi  * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * */
 void CameraWebServer_AP::connectToWifi() {
   uint64_t chipid = ESP.getEfuseMac();
   char string[10];
@@ -229,40 +237,5 @@ void CameraWebServer_AP::CameraWebServer_AP_Init(void)
   Serial.println("\r\n");
 
   connectToWifi();
-  // uint64_t chipid = ESP.getEfuseMac();
-  // char string[10];
-  // sprintf(string, "%04X", (uint16_t)(chipid >> 32));
-  // String mac0_default = String(string);
-  // sprintf(string, "%08X", (uint32_t)chipid);
-  // String mac1_default = String(string);
-  // String url = SSID + mac0_default + mac1_default;
-  // const char *mac_default = url.c_str();
-
-  // Serial.println(":----------------------------:");
-  // Serial.print("wifi_name:");
-  // Serial.println(mac_default);
-  // Serial.println(":----------------------------:");
-  // wifi_name = mac0_default + mac1_default;
-
-  // WiFi.begin(SSID, PASSWORD);
-
-  // Serial.print("Connecting to SSID: ");
-  // Serial.println(SSID);
-
-  // while (WiFi.status() != WL_CONNECTED) {
-  //   delay(666);
-  //   Serial.print(".");
-  // }
-
-  // Serial.println("\nConnected to WiFi");
-  // Serial.print("IP Address: ");
-  // Serial.println(WiFi.localIP());
-
-  // sendTurnOnRequest();
-  // startCameraServer();
-
-  // Serial.print("Camera server is ready! Use 'http://");
-  // Serial.print(WiFi.localIP());
-  // Serial.println("' to connect");
 }
 
