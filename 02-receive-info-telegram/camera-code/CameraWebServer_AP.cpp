@@ -201,6 +201,33 @@ void CameraWebServer_AP::connectToWifi() {
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * */
+/* * *  Read the config from the Worker  * * */
+/* * * * * * * * * * * * * * * * * * * * * * */
+void CameraWebServer_AP::readRemoteSettings(void) {
+  HTTPClient http;
+  
+  Serial.print("Calling Settings URL: ");
+  Serial.println(SETTINGS_WORKER_URL);
+  
+  http.begin(SETTINGS_WORKER_URL);
+  int httpResponseCode = http.GET();
+
+  if (httpResponseCode > 0) {
+    Serial.print("Settings Response code: ");
+    Serial.println(httpResponseCode);
+
+    String response = http.getString();
+    Serial.println("Settings Response: ");
+    Serial.println(response);
+  } else {
+    Serial.print("HTTP Request failed. Error code: ");
+    Serial.println(httpResponseCode);
+  }
+
+  http.end();
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * */
 /* * *  Initialize the Camera Server * * * * */
 /* * * * * * * * * * * * * * * * * * * * * * */
 void CameraWebServer_AP::CameraWebServer_AP_Init(void)
@@ -237,5 +264,6 @@ void CameraWebServer_AP::CameraWebServer_AP_Init(void)
   Serial.println("\r\n");
 
   connectToWifi();
+  readRemoteSettings();
 }
 

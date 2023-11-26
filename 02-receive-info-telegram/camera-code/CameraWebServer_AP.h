@@ -22,6 +22,7 @@ public:
 private:
   void connectToWifi();
   camera_config_t loadConfig(void);
+  void readRemoteSettings(void);
 };
 
 #endif
