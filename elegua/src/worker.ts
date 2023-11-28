@@ -60,21 +60,22 @@ export default {
             return new Response('Could not read text of the message');
         }
 
-        return this.routeAndProcessRequest(body.message.text);
+        return this.routeAndProcessRequest(body);
     },
 
-    async routeAndProcessRequest(requestType) {
-        switch(requestType) {
+    async routeAndProcessRequest(body: any) {
+        console.log("Switch: " + body.message.text);
+        switch(body.message.text) {
             case "state": case "return state":
                 return this.returnState();
             case "turn on":
-                return this.turnOn();
+                return this.turnOn(body);
             case "turn off":
                 return this.turnOff();
             case "ping":
                 return this.ping();
             default:
-                await this.sendTelegramMessage("I don't understand what you want.")
+                await this.sendTelegramMessage(`I don't understand what you want: "${body.message.text}'`)
         }
 
         return new Response("I don't understand what you want.");
@@ -88,14 +89,14 @@ export default {
         return jsonResponse({"state": state, "message": `The rover is: ${state}`});
     },
 
-    async turnOn() {
+    async turnOn(body: any) {
         const timestamp = Date.now();
         const now = new Date(timestamp);
 
         Promise.all([
             this.KV.put("state", "on"),
             this.KV.put("last_ping_timestamp", timestamp),
-            this.sendTelegramMessage(`The rover was turned on [${now.toLocaleString()}]`),
+            this.sendTelegramMessage(`The rover was turned on [${now.toLocaleString()}]. ${body.message.info ?? ''}`),
         ]);
 
         console.log(`I set the last ping timestamp to: ${timestamp}`);
@@ -120,23 +121,21 @@ export default {
         const timestamp = Date.now();
         const now = new Date();
 
-        await Promise.all([
-            this.KV.put("state", "on"),
-            this.KV.put("last_ping_timestamp", timestamp),
+        // await Promise.all([
+            // this.KV.put("state", "on"),
+            // this.KV.put("last_ping_timestamp", timestamp),
             // this.sendTelegramMessage(`[x] The rover 1 sent a ping [${now.toLocaleString()}]`),
-        ])
+        // ])
 
         return new Response("Ok");
     },
 
     async sendTelegramMessage(message) {
         const apiUrl = `https://api.telegram.org/bot${this.bot_token}/sendMessage`;
-        const printable = this.bot_token.substring(0, 12)
-        // console.log(`Chat ID: ${this.chatID}`);
-        // console.log(`Bot Token: ${printable}...`);
 
         try {
             console.log(`Fetching: ${apiUrl}`);
+            console.log(`Message: ${message}`);
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {  'Content-Type': 'application/json' },
