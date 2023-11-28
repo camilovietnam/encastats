@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "new": "cpp",
+        "string": "cpp",
+        "typeinfo": "cpp",
+        "vector": "cpp",
+        "stdexcept": "cpp",
+        "sstream": "cpp"
+    }
+}

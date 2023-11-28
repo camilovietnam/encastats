@@ -14,32 +14,21 @@
 
 Driver MyDriver;
 
-// never used anymore
-// enum CarModes {
-//     Mode_1,
-//     Mode_2,
-//     Mode_3,
-//     Mode_4,
-//     Mode_5,
-//     Mode_6,
-// };
-
-// struct Application {
-//     CarModes Car_Mode;
-// };
-
-
-// Application ElegooCar;
-
 Motor AppMotor;
 uint8_t speed = 60;
 
+/* * * * * * * * * * * * * * * * * */
+/* Setup the car app * * * * * * * */
+/* * * * * * * * * * * * * * * * * */
 void AppFunction::Init(void) {
     bool res_error = true;
     Serial.begin(9600);
     MyDriver.Init();
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Move the car in a given direction * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * */
 void AppFunction::MoveTheCar(uint8_t movement){
     switch (movement) {
         case btnForward:
@@ -75,6 +64,9 @@ void AppFunction::MoveTheCar(uint8_t movement){
     }
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Read a button from the controller * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * */
 uint8_t AppFunction::ReceiveCommandFromController(void) {
     uint8_t Button_pressed = 100;
 
@@ -82,7 +74,7 @@ uint8_t AppFunction::ReceiveCommandFromController(void) {
 
     if (MyDriver.Get(&Button_pressed)) {
         data_received = true;
-        Serial.println(Button_pressed);
+        // Serial.println(Button_pressed);
     }
 
     if (true == data_received) {
@@ -92,6 +84,9 @@ uint8_t AppFunction::ReceiveCommandFromController(void) {
     return Button_pressed;
 }
 
+/* * * * * * * * * * * * * * * */
+/* Stop the car  * * * * * * * */
+/* * * * * * * * * * * * * * * */
 void AppFunction::StopTheCar(void) {
     AppMotor.Stop();
 }

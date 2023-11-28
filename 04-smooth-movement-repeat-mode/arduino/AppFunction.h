@@ -8,15 +8,16 @@
 
 enum ButtonCommands
 { 
-    btnForward = 1,   //(1)
-    btnBackward,      //(2)
-    btnLeft,          //(3)
-    btnRight,         //(4)
-    btnStop,           //(9)
-    btnModeFree,   //(5)
-    bntModeLearn,  //(6)
-    btnModeRepeat,  //(7)
-    Mode4, //(8)
+    btnForward = 1,    //(1)
+    btnBackward,       //(2)
+    btnLeft,           //(3)
+    btnRight,          //(4)
+    btnStop,           //(5)
+    btnModeFree,       //(6)
+    bntModeLearn,      //(7)
+    btnModeRepeat,     //(8)
+    Mode4,             //(9)
+    btnUnknown = 100
 };
 
 class AppFunction {

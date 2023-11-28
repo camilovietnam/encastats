@@ -3,42 +3,64 @@
 #include "AppFunction.h"
 #include "Timeout.h"
 
-// Variables for all Modes
+/* * * * * * * * * * * * * * * * * */
+/* Variables for all Modes * * * * */
+/* * * * * * * * * * * * * * * * * */
 bool modeLoopedAtLeastOnce = false;
 
-// Variables for Free Mode
+/* * * * * * * * * * * * * * * * * */
+/* Variables for Free Mode * * * * */
+/* * * * * * * * * * * * * * * * * */
 unsigned long startTime = 0;
-const unsigned int delayForShortMovement = 350;  // 500 ms for spinning left or right
+const unsigned int delayForShortMovement = 500;  // 500 ms for spinning left or right
 const unsigned int delayForLongMovement = 750;   // 700 ms for forward and backward
 bool countingDown = false;
 uint8_t lastButtonPressed;
 Timeout beginningOfMovement;
 
-// Variables for Learn Mode
-const int maxHistorySize = 10;
+/* * * * * * * * * * * * * * * * * */
+/* Variables for Learn Modes * * * */
+/* * * * * * * * * * * * * * * * * */
+const int maxHistorySize = 50;
 uint8_t buttonHistory[maxHistorySize];
-int historyIndex = 0;
+uint8_t historyIndex = 0;
+uint8_t buttonsMemorized;
 
+/* * * * * * * * * * * * * * * * * */
+/* Variables for Repeat Mode * * * */
+/* * * * * * * * * * * * * * * * * */
+bool isRepeating;
+uint8_t repeatingButtonIndex;
+
+/* * * * * * * * * * * * * * * * * */
+/* List of modes available * * * * */
+/* * * * * * * * * * * * * * * * * */
 enum Modes
 { 
-    modeFree = 6,   //(1) Freedom of movement
-    modeLearn,      //(2) Freedom of movement - but the movements are stored in an array
-    modeRepeat,     //(3) The movements are repeated from the array
+    modeFree = 6,   // (Button 1) Freedom of movement
+    modeLearn,      // (Button 2) Freedom of movement - but the movements are stored in an array
+    modeRepeat,     // (Button 3) The movements are repeated from the array
 };
 
 uint8_t carMode = modeFree;    // we begin in FREE MODE
 
+/* * * * * * * * * * * * * * * * * */
+/* Setup the Arduino app * * * * * */
+/* * * * * * * * * * * * * * * * * */
 void setup() {
   MyApp.Init();
   Serial.println(" > > > > > > > > > > > > > > > > > > > > >");
   Serial.println(" > > > > > > > > > > > > > > > > > > > > >");
-  Serial.println(" > > > > ELEGOO CAR  > > > > > > > > > > >");
+  Serial.println(" > > > > ELEGOO CAR  > > > > > > >");
   Serial.println(" > > > > > > > > > > > > > > > > > > > > >");
   Serial.println(" > > > > > > > > > > > > > > > > > > > > >");
 
   Serial.println("The car will start in Free Mode.");
 }
 
+/* * * * * * * * * * * * * * * * * */
+/* * * * * Main Loop * * * * * * * */
+/* * * * * * * * * * * * * * * * * */
 void loop() {
   switch (carMode) {
     case modeFree:
@@ -53,6 +75,9 @@ void loop() {
   }  
 }
 
+/* * * * * * * * * * * * * * * * * * */
+/* Loop for Mode 1: Free movement  * */
+/* * * * * * * * * * * * * * * * * * */
 void loopModeFree() {
   unsigned long currentTime = millis();
 
@@ -77,7 +102,7 @@ void loopModeFree() {
         if (beginningOfMovement.HasElapsed(delayForLongMovement)) {
           // stop the car
           countingDown = false;
-          lastButtonPressed = 100;
+          lastButtonPressed = btnUnknown;
           MyApp.StopTheCar();
         }
         break;
@@ -86,32 +111,34 @@ void loopModeFree() {
         if (beginningOfMovement.HasElapsed(delayForShortMovement)) {
           // stop the car
           countingDown = false;
-          lastButtonPressed = 100;
+          lastButtonPressed = btnUnknown;
           MyApp.StopTheCar();
         }
         break;
       default:
-        // todo: I think this is not ne
         countingDown = false;
         break;
   }  
 }
 
+/* * * * * * * * * * * * * * * * * * * */
+/* Loop for Mode 1: Learn movements  * */
+/* * * * * * * * * * * * * * * * * * * */
 void loopModeLearn() {
   if (!modeLoopedAtLeastOnce) {
     // This is the first loop. Reset the history
     modeLoopedAtLeastOnce = true;
+    buttonsMemorized = 0;
     historyIndex = 0;
   }
 
   unsigned long currentTime = millis();
 
+  // We are not waiting for a movement
   if (!countingDown) {
     lastButtonPressed = MyApp.ReceiveCommandFromController();
 
     if (isModeChange(lastButtonPressed)) {
-      Serial.print("Changed mode LEARN -> ");
-      Serial.println(lastButtonPressed);
       MyApp.StopTheCar();
       carMode = lastButtonPressed;
       modeLoopedAtLeastOnce = false;
@@ -120,13 +147,12 @@ void loopModeLearn() {
       startTime = millis();
       countingDown = true;
       beginningOfMovement.Reset();
+      buttonsMemorized++;
 
       // store the movement in the button history, if there is enough space
       if (historyIndex < maxHistorySize) {
         buttonHistory[historyIndex] = lastButtonPressed;
         historyIndex++;
-        Serial.print("Saved movement: ");
-        Serial.println(lastButtonPressed);
       } else {
         Serial.println("You used all the memory for buttons. Go to Repeat mode now.");
       }
@@ -140,7 +166,7 @@ void loopModeLearn() {
         if (beginningOfMovement.HasElapsed(delayForLongMovement)) {
           // stop the car
           countingDown = false;
-          lastButtonPressed = 100;
+          lastButtonPressed = btnUnknown;
           MyApp.StopTheCar();
         }
         break;
@@ -149,45 +175,95 @@ void loopModeLearn() {
         if (beginningOfMovement.HasElapsed(delayForShortMovement)) {
           // stop the car
           countingDown = false;
-          lastButtonPressed = 100;
+          lastButtonPressed = btnUnknown;
           MyApp.StopTheCar();
         }
         break;
       default:
         countingDown = false;
         break;
-  }  
+  } 
 }
 
+/* * * * * * * * * * * * * * * * * * * */
+/* Loop for Mode 1: Repeat movement  * */
+/* * * * * * * * * * * * * * * * * * * */
 void loopModeRepeat() {
-    // Allow reading a new button command
-    lastButtonPressed = MyApp.ReceiveCommandFromController(); 
+  uint8_t mov;
+  unsigned int delay;
 
-    if (isModeChange(lastButtonPressed)) {
-      Serial.print("Changed mode REPEAT -> ");
-      Serial.println(lastButtonPressed);
-      MyApp.StopTheCar();
-      carMode = lastButtonPressed;
-      modeLoopedAtLeastOnce = false;
+  // Allow reading a new button command
+  lastButtonPressed = MyApp.ReceiveCommandFromController(); 
+
+  // if during the Repeat, the mode changes:
+  if (isModeChange(lastButtonPressed)) {
+    MyApp.StopTheCar();
+    carMode = lastButtonPressed;
+    isRepeating = false;
+    modeLoopedAtLeastOnce = false;
+
+    return;
+  }
+
+  // the first loop of the repetition
+  if (!isRepeating && !modeLoopedAtLeastOnce) {
+      isRepeating = true;
+      repeatingButtonIndex = 0;
+      mov = buttonHistory[repeatingButtonIndex];
+      beginningOfMovement.Reset();
+      MyApp.MoveTheCar(mov);
+
+      return;
+  }
+  
+  // regular repeat loop
+  mov = buttonHistory[repeatingButtonIndex];
+  if (isRepeating) {
+    // based on the button, check its timeout
+    switch(mov) {
+      case btnForward:
+      case btnBackward:
+        delay = delayForLongMovement;
+        break;
+      case btnLeft:
+      case btnRight:
+        delay = delayForShortMovement;
+        break;
+      default:
+        Serial.print("movement not detected: ");
+        Serial.println(mov);
+    }
+
+    // still have to wait a little bit more
+    if (!beginningOfMovement.HasElapsed(delay)) {
       return;
     }
 
-  if (carMode == modeRepeat && !modeLoopedAtLeastOnce) {
-    Serial.println("Enter loop repeat");
-    Serial.print("Buttons to repeat: ");
-    for (int i = 0; i < historyIndex; ++i) {
-        Serial.print(buttonHistory[i]);
-        Serial.print(" ");
-    }
-    Serial.println(); 
+    // no more delay for now, have I finished? 
+    if (repeatingButtonIndex >= buttonsMemorized - 1) {
+      isRepeating = false;
+      repeatingButtonIndex = 0;
+      mov = buttonHistory[repeatingButtonIndex];
+      modeLoopedAtLeastOnce = true;
+      MyApp.StopTheCar();
 
+      return;
+    }
+
+    // I have not finished, more buttons to repeat
+    repeatingButtonIndex++;
+    mov = buttonHistory[repeatingButtonIndex];
+    MyApp.MoveTheCar(mov);
+    beginningOfMovement.Reset();
+      
     // historyIndex = 0; This would enable printing only once
-    
-    modeLoopedAtLeastOnce = true;
+    // modeLoopedAtLeastOnce = true;
   }
 }
 
-
+/* * * * * * * * * * * * * * * * * * * * * */
+/* Check whether the movement is valid * * */
+/* * * * * * * * * * * * * * * * * * * * * */
 bool isValidMovement(uint8_t buttonPressed) {
   switch (buttonPressed) {
     case btnForward:
@@ -201,6 +277,9 @@ bool isValidMovement(uint8_t buttonPressed) {
   return false;
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Check whether the button pressed is a change mode button  * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 bool isModeChange(uint8_t buttonPressed) {
   switch (buttonPressed) {
     case btnModeFree:
