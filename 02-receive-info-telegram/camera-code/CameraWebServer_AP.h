@@ -23,6 +23,8 @@ private:
   void connectToWifi();
   camera_config_t loadConfig(void);
   void readRemoteSettings(void);
+  void parseJsonResponse(const char* jsonResponse);
+  void estimateMemoryUsage(void);
 };
 
 #endif

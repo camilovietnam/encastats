@@ -45,6 +45,7 @@
 #include <sstream>
 #include <string>
 
+// #include <ArduinoJson.h>
 
 /* * * * * * * * * * * * * * * * * * * * * * */
 /* * *  Send HTTP Turn On    * * * * * * * * */
@@ -53,10 +54,13 @@ void sendTurnOnRequest() {
   HTTPClient http;
   std::ostringstream requestBodyStream;
 
-  requestBodyStream << "{\"message\":{\"chat\":{\"id\":" << TELEGRAM_CHAT_ID << "},\"text\":\"turn on\"}}";
+  requestBodyStream << "{\"message\":{\"chat\":{\"id\":" << TELEGRAM_CHAT_ID << "},\"text\":\"turn on\", \"info\":\"Camera server: " << WiFi.localIP().toString().c_str() <<  "\"}}";
 
-  Serial.println("Calling URL:");
-  Serial.print(requestBodyStream.str().c_str());
+  // Serial.print("Calling URL:");
+  // Serial.println(CLOUDFLARE_WORKER_URL);
+  //
+  // Serial.print("Request body:");
+  // Serial.println(requestBodyStream.str().c_str());
 
   http.begin(CLOUDFLARE_WORKER_URL);
   http.addHeader("Content-Type", "application/json");
@@ -178,10 +182,13 @@ void CameraWebServer_AP::connectToWifi() {
   Serial.println(":----------------------------:");
   wifi_name = mac0_default + mac1_default;
 
-  WiFi.begin(SSID, PASSWORD);
+  // Serial.print("Connecting to SSID: ");
+  // Serial.println(SSID);
+  //
+  // Serial.print("Using password: ");
+  // Serial.println(PASSWORD);
 
-  Serial.print("Connecting to SSID: ");
-  Serial.println(SSID);
+  WiFi.begin(SSID, PASSWORD);
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(666);
@@ -198,33 +205,6 @@ void CameraWebServer_AP::connectToWifi() {
   Serial.print("Camera server is ready! Use 'http://");
   Serial.print(WiFi.localIP());
   Serial.println("' to connect");
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * */
-/* * *  Read the config from the Worker  * * */
-/* * * * * * * * * * * * * * * * * * * * * * */
-void CameraWebServer_AP::readRemoteSettings(void) {
-  HTTPClient http;
-  
-  Serial.print("Calling Settings URL: ");
-  Serial.println(SETTINGS_WORKER_URL);
-  
-  http.begin(SETTINGS_WORKER_URL);
-  int httpResponseCode = http.GET();
-
-  if (httpResponseCode > 0) {
-    Serial.print("Settings Response code: ");
-    Serial.println(httpResponseCode);
-
-    String response = http.getString();
-    Serial.println("Settings Response: ");
-    Serial.println(response);
-  } else {
-    Serial.print("HTTP Request failed. Error code: ");
-    Serial.println(httpResponseCode);
-  }
-
-  http.end();
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * */
@@ -264,6 +244,95 @@ void CameraWebServer_AP::CameraWebServer_AP_Init(void)
   Serial.println("\r\n");
 
   connectToWifi();
-  readRemoteSettings();
+  // readRemoteSettings();
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * */
+/* * *  Parse an HTTP response into JSON * * */
+/* * * * * * * * * * * * * * * * * * * * * * */
+// void CameraWebServer_AP::parseJsonResponse(const char* jsonResponse) {
+//   // estimateMemoryUsage();
+//
+//   // const size_t bufferSize = JSON_OBJECT_SIZE(3) + 150;
+//   DynamicJsonDocument doc(150);
+//
+//   // Parse the JSON response
+//   DeserializationError error = deserializeJson(doc, jsonResponse);
+//
+//   // Check for parsing errors
+//   if (error) {
+//     Serial.print(F("Failed to parse JSON: "));
+//     Serial.println(error.c_str());
+//     return;
+//   }
+
+  // // Extract values from the JSON document
+  // // const char* ssid = strdup(doc["ssid"]);
+  // // const char* password = strdup(doc["password"]);
+  // // long long telegramChatId = strdup(doc["chatId"]);
+  // SSID = strdup(doc["ssid"]);
+  // PASSWORD = strdup(doc["password"]);
+  // long long telegramChatId = doc["chatId"];
+  //
+  // // Print the extracted values (you can remove this part in the actual code)
+  // Serial.print(F("SSID: "));
+  // Serial.println(SSID);
+  // Serial.print(F("Password: "));
+  // Serial.println(PASSWORD);
+  // Serial.print(F("Telegram Chat ID: "));
+  // Serial.println(telegramChatId);
+  //
+  // // Now you can use these values in your ESP32 code as needed
+  // // For example, you can assign them to your variables:
+  // // SSID = ssid;
+  // // PASSWORD = password;
+  // // TELEGRAM_CHAT_ID = telegramChatId;
+// }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * *  Used to estimate size of JSON responses  * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * */
+// void CameraWebServer_AP::estimateMemoryUsage(void) {
+//   // Create a JSON document with estimated sizes
+//   const size_t bufferSize = JSON_OBJECT_SIZE(3) + 150;
+//   DynamicJsonDocument doc(bufferSize);
+
+//   // Add data to the JSON document
+//   doc["ssid"] = "XX_XX";
+//   doc["password"] = "5MxxxxPaaaaaaaaaabbbbbbBbBbbb";
+//   doc["chatId"] = "1111262831";
+
+//   // Estimate memory usage
+//   Serial.print("Estimated memory usage: ");
+//   Serial.println(doc.memoryUsage());
+// }
+
+
+/* * * * * * * * * * * * * * * * * * * * * * */
+/* * *  Read the config from the Worker  * * */
+/* * * * * * * * * * * * * * * * * * * * * * */
+// void CameraWebServer_AP::readRemoteSettings(void) {
+//   HTTPClient http;
+  
+//   Serial.print("Calling Settings URL: ");
+//   Serial.println(SETTINGS_WORKER_URL);
+  
+//   http.begin(SETTINGS_WORKER_URL);
+//   int httpResponseCode = http.GET();
+
+//   if (httpResponseCode > 0) {
+//     Serial.print("Settings Response code: ");
+//     Serial.println(httpResponseCode);
+
+//     String response = http.getString();
+//     Serial.println("Settings Response: ");
+//     Serial.println(response);
+
+//     parseJsonResponse(response.c_str());
+//   } else {
+//     Serial.print("HTTP Request failed. Error code: ");
+//     Serial.println(httpResponseCode);
+//   }
+
+//   http.end();
+// }
