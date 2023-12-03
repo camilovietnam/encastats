@@ -1,10 +1,10 @@
 /*
- * @Description:
- * @version: 
- * @Author: Elegoo
- * @Date: 2020-06-04 11:42:27
- * @LastEditors: Changhua
- * @LastEditTime: 2020-07-23 14:21:48
+ * @Description: A Web server that listens to HTTP commands
+ * @version: 0.0.1
+ * @Author: long
+ * @Date: 2023-12-02
+ * @LastEditors: long
+ * @LastEditTime: 2020-12-02
  */
 #include "CommandWebServer.h"
 #include <ESPAsyncWebSrv.h>
@@ -12,7 +12,6 @@
 AsyncWebServer CommandWebServer::server(8080);
 
 void CommandWebServer::Begin(void) {
-  Serial.println("enter Begin...");
   server.on("/forward", HTTP_GET, handleForward);
   server.on("/backward", HTTP_GET, handleBackward);
   server.on("/left", HTTP_GET, handleLeft);

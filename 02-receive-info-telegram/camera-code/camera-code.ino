@@ -11,7 +11,6 @@
 #include "CommandWebServer.h"
 #include <WiFi.h>
 #include "esp_camera.h"
-WiFiServer server(100);
 
 #define RXD2 33
 #define TXD2 4
@@ -25,14 +24,14 @@ void setup()
   Serial.begin(9600);
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   CameraWebServerAP.CameraWebServer_AP_Init();
-  server.begin();
+
+  // give time to the program to finish
   delay(100);
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
 
   CommandWebServer.Begin();
 }
-
 
 // Ping
 unsigned long lastPingTime = 0;

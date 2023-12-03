@@ -2,36 +2,8 @@
 // WARNING!!! Make sure that you have selected Board ---> ESP32 Dev Module
 //            Partition Scheme ---> Huge APP (3MB No OTA/1MB SPIFFS)
 //            PSRAM ---> enabled
-//重要配置：
-// #define HTTPD_DEFAULT_CONFIG()             \
-//   {                                        \
-//     .task_priority = tskIDLE_PRIORITY + 5, \
-//     .stack_size = 4096,                    \
-//     .server_port = 80,                     \
-//     .ctrl_port = 32768,                    \
-//     .max_open_sockets = 7,                 \
-//     .max_uri_handlers = 8,                 \
-//     .max_resp_headers = 8,                 \
-//     .backlog_conn = 5,                     \
-//     .lru_purge_enable = false,             \
-//     .recv_wait_timeout = 5,                \
-//     .send_wait_timeout = 5,                \
-//     .global_user_ctx = NULL,               \
-//     .global_user_ctx_free_fn = NULL,       \
-//     .global_transport_ctx = NULL,          \
-//     .global_transport_ctx_free_fn = NULL,  \
-//     .open_fn = NULL,                       \
-//     .close_fn = NULL,                      \
-//   }
-
-// Select camera model
-// #define CAMERA_MODEL_WROVER_KIT
-//#define CAMERA_MODEL_ESP_EYE
-//#define CAMERA_MODEL_M5STACK_PSRAM
 
 #define CAMERA_MODEL_M5STACK_WIDE
-
-//#define CAMERA_MODEL_AI_THINKER
 
 #include "CameraWebServer_AP.h"
 #include "camera_pins.h"
@@ -45,7 +17,6 @@
 #include <sstream>
 #include <string>
 
-// #include <ArduinoJson.h>
 
 /* * * * * * * * * * * * * * * * * * * * * * */
 /* * *  Send HTTP Turn On    * * * * * * * * */
@@ -181,12 +152,6 @@ void CameraWebServer_AP::connectToWifi() {
   Serial.println(mac_default);
   Serial.println(":----------------------------:");
   wifi_name = mac0_default + mac1_default;
-
-  // Serial.print("Connecting to SSID: ");
-  // Serial.println(SSID);
-  //
-  // Serial.print("Using password: ");
-  // Serial.println(PASSWORD);
 
   WiFi.begin(SSID, PASSWORD);
 
