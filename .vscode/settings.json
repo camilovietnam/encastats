@@ -5,6 +5,13 @@
         "typeinfo": "cpp",
         "vector": "cpp",
         "stdexcept": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "array": "cpp",
+        "string_view": "cpp",
+        "__bit_reference": "cpp",
+        "__hash_table": "cpp",
+        "__split_buffer": "cpp",
+        "initializer_list": "cpp",
+        "unordered_map": "cpp"
     }
 }
