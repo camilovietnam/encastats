@@ -30,6 +30,7 @@ public:
   String wifi_name;  
 private:
   void connectToWifi();
+  void sendTurnOnRequest();
 };
 
 #endif

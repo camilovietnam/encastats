@@ -11,9 +11,18 @@
 void startCameraServer();
 
 /* * * * * * * * * * * * * * * * * * * * * * */
+/* * *  Initialize the Camera Server * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * */
+void CameraWebServer_AP::CameraWebServer_AP_Init(void)
+{
+  connectToWifi();
+  // readRemoteSettings();
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * */
 /* * *  Send HTTP Turn On    * * * * * * * * */
 /* * * * * * * * * * * * * * * * * * * * * * */
-void sendTurnOnRequest() {
+void CameraWebServer_AP::sendTurnOnRequest() {
   HTTPClient http;
   std::ostringstream requestBodyStream;
 
@@ -113,11 +122,3 @@ void CameraWebServer_AP::connectToWifi() {
   Serial.println("' to connect");
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * */
-/* * *  Initialize the Camera Server * * * * */
-/* * * * * * * * * * * * * * * * * * * * * * */
-void CameraWebServer_AP::CameraWebServer_AP_Init(void)
-{
-  connectToWifi();
-  // readRemoteSettings();
-}
