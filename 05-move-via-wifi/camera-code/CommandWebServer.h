@@ -8,17 +8,19 @@
  */
 #ifndef _CommandWebServer_H
 #define _CommandWebServer_H
+
 #include <ESPAsyncWebSrv.h>
+#include "Camera.h"
 
 class CommandWebServer
 {
 public:
-  static void Begin(void);
+  static void Begin();
 private:
   static AsyncWebServer server;
   static void handleRequest(AsyncWebServerRequest *request);
   static void handleCors(AsyncWebServerResponse *response);
-  static void handleMovement(AsyncWebServerRequest *response, const char * movement);
+  static void handleCapture(AsyncWebServerRequest *request);
 };
 
 #endif

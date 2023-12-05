@@ -15,9 +15,9 @@
 class Camera {
   public:
     static void Init(void);
+    static void takePhoto(void);
+  private:
     static camera_config_t loadConfig(void);
 };
-
-
 
 #endif //CAMERA_H

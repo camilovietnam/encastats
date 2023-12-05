@@ -34,7 +34,6 @@ void Camera::Init() {
 
   // s->set_vflip(s, 1);   //图片方向设置（上下）
   // s->set_hmirror(s, 1); //图片方向设置（左右）
-
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * */
@@ -77,4 +76,8 @@ camera_config_t Camera::loadConfig(void) {
   }
 
   return config;
+}
+
+void Camera::takePhoto(void) {
+  Serial.println("took a photo");
 }
