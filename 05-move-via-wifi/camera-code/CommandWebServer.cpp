@@ -61,6 +61,9 @@ void CommandWebServer::handleCapture(AsyncWebServerRequest *request) {
         return;
     }
 
-    request->send_P(200, "image/jpeg", fb->buf, fb->len);
+    response = request->beginResponse_P(200, "image/jpeg", fb->buf, fb->len);
+    handleCors(response);
+    request->send(response);
+    
     esp_camera_fb_return(fb);
 }
