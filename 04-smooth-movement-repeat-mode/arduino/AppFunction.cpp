@@ -9,6 +9,8 @@
 #include "Driver.h"
 #include "Motor.h"
 
+#include <HardwareSerial.h>
+
 #define _is_print 1
 #define _Test_print 0
 
@@ -17,12 +19,14 @@ Driver MyDriver;
 Motor AppMotor;
 uint8_t speed = 60;
 
+
 /* * * * * * * * * * * * * * * * * */
 /* Setup the car app * * * * * * * */
 /* * * * * * * * * * * * * * * * * */
 void AppFunction::Init(void) {
     bool res_error = true;
     Serial.begin(9600);
+
     MyDriver.Init();
 }
 

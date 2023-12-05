@@ -1,14 +1,13 @@
 /*
- * @Descripttion: 
+ * @Description:  A web server that accepts requests and notifies the Serial port 2
  * @version: 
- * @Author: Elegoo
- * @Date: 2020-06-04 11:42:27
- * @LastEditors: Changhua
- * @LastEditTime: 2020-07-23 14:21:48
+ * @Author: long
+ * @Date: 2023-12-04
+ * @LastEditors: long
+ * @LastEditTime: 2012-12-04
  */
-
 #ifndef _CommandWebServer_H
-#define _CommandWßebServer_H
+#define _CommandWebServer_H
 #include <ESPAsyncWebSrv.h>
 
 class CommandWebServer
@@ -17,14 +16,8 @@ public:
   static void Begin(void);
 private:
   static AsyncWebServer server;
-  static void handleForward(AsyncWebServerRequest *request);
-  static void handleBackward(AsyncWebServerRequest *request);
-  static void handleLeft(AsyncWebServerRequest *request);
-  static void handleRight(AsyncWebServerRequest *request);
-  static void handleStop(AsyncWebServerRequest *request);
-  static void handleNotFound(AsyncWebServerRequest *request);
+  static void handleRequest(AsyncWebServerRequest *request);
   static void handleCors(AsyncWebServerResponse *response);
-  
   static void handleMovement(AsyncWebServerRequest *response, const char * movement);
 };
 

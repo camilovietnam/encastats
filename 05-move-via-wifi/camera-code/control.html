@@ -66,9 +66,24 @@
     <td><button class="btn btn-primary" onclick="sendCommand('/backward')">Backward</button></td>
     <td></td>
   </tr>
+  <tr>
+    <td></td>
+    <td><button class="btn btn-primary" onclick="showStream()">Show Stream</button></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="3">
+      <img style="display: none" id="stream" src="http://192.168.0.17:81/stream">
+    </td>
+  </tr>
 </table>
 
 <script>
+  function showStream() {
+    const stream = document.getElementById("stream");
+    stream.style.display = 'block';
+  }
+
   function sendCommand(endpoint) {
     var url = document.getElementById('urlInput').value;
     var fullURL = url + endpoint;

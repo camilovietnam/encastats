@@ -19,10 +19,14 @@ CommandWebServer CommandWebServer;
 
 bool WA_en = false;
 
+#define RXD2 33
+#define TXD2 4
+
 void setup()
 {
   Serial.begin(9600);
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+
   CameraWebServerAP.CameraWebServer_AP_Init();
 
   // give time to the program to finish
@@ -41,7 +45,8 @@ void loop()
 {
   if (millis() - lastPingTime >= pingInterval) {
     // todo: restore ping
-    // Serial.println("Ping");
+    Serial.println("camera ping: Serial");
+    Serial2.println("camera ping: Serial2");
     // CameraWebServerAP.PingWorker();
     lastPingTime = millis();
   }

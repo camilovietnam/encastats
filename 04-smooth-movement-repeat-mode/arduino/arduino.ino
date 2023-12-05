@@ -48,6 +48,8 @@ uint8_t carMode = modeFree;    // we begin in FREE MODE
 /* Setup the Arduino app * * * * * */
 /* * * * * * * * * * * * * * * * * */
 void setup() {
+  Serial.begin(9600);
+
   MyApp.Init();
   Serial.println(" > > > > > > > > > > > > > > > > > > > > >");
   Serial.println(" > > > > > > > > > > > > > > > > > > > > >");
@@ -61,7 +63,17 @@ void setup() {
 /* * * * * * * * * * * * * * * * * */
 /* * * * * Main Loop * * * * * * * */
 /* * * * * * * * * * * * * * * * * */
-void loop() {
+
+void loopOld() {
+  // read the serial stuff
+  
+  if (Serial.available()) {
+    String receivedString = Serial.readStringUntil('\n');
+    if (receivedString.length() > 0) {
+      Serial.println("Received: " + receivedString);
+    }
+  }
+  
   switch (carMode) {
     case modeFree:
       loopModeFree();
@@ -289,4 +301,31 @@ bool isModeChange(uint8_t buttonPressed) {
   }
 
   return false;
+}
+
+char receivedChar;
+boolean newData = false;
+
+// debug: Trying to read data from Serial port
+void loop() {
+  recvOneChar();
+  showNewData();
+}
+
+void recvOneChar() {
+    if (Serial.available() > 0) {
+      String receivedString = Serial.readStringUntil('\n');
+      if (receivedString.length() > 0) {
+        Serial.println("Received: " + receivedString);
+        // Process the received data as needed
+      }
+    }
+}
+
+void showNewData() {
+    if (newData == true) {
+        Serial.print("This just in ... ");
+        Serial.println(receivedChar);
+        newData = false;
+    }
 }
