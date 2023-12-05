@@ -7,15 +7,20 @@
  * @LastEditTime: 2023-11-18
  */
 
+#define CAMERA_MODEL_M5STACK_WIDE
+
 #include "CameraWebServer_AP.h"
 #include "CommandWebServer.h"
-#include <WiFi.h>
+#include "Camera.h"
 #include "esp_camera.h"
+#include <WiFi.h>
 
 #define RXD2 33
 #define TXD2 4
+
 CameraWebServer_AP CameraWebServerAP;
 CommandWebServer CommandWebServer;
+Camera camera;
 
 bool WA_en = false;
 
@@ -27,6 +32,7 @@ void setup()
   Serial.begin(9600);
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
 
+  camera.Init();
   CameraWebServerAP.CameraWebServer_AP_Init();
 
   pinMode(13, OUTPUT);

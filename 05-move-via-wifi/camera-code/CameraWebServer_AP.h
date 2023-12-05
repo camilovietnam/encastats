@@ -9,8 +9,17 @@
 
 #ifndef _CameraWebServer_AP_H
 #define _CameraWebServer_AP_H
+
+#include "camera_pins.h"
+#include "esp_system.h"
 #include "esp_camera.h"
+
 #include <WiFi.h>
+#include <HTTPClient.h>
+
+#include <iostream>
+#include <sstream>
+#include <string>
 
 class CameraWebServer_AP
 {
@@ -21,10 +30,6 @@ public:
   String wifi_name;  
 private:
   void connectToWifi();
-  camera_config_t loadConfig(void);
-  void readRemoteSettings(void);
-  void parseJsonResponse(const char* jsonResponse);
-  void estimateMemoryUsage(void);
 };
 
 #endif
