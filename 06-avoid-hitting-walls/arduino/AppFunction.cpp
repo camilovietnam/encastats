@@ -2,32 +2,25 @@
 // Created by Long  on 18/11/2023.
 //
 
-#include <hardwareSerial.h>
 #include <stdio.h>
 #include <string.h>
 #include "AppFunction.h"
 #include "Driver.h"
 #include "Motor.h"
+#include "Ultrasonic.h"
 
-#include <HardwareSerial.h>
-
-#define _is_print 1
-#define _Test_print 0
+uint8_t speed = 60;            // motor speed
+uint16_t minDistance = 10;    // Min distance forward to obstacle
 
 Driver MyDriver;
-
-Motor AppMotor;
-uint8_t speed = 60;
-
 
 /* * * * * * * * * * * * * * * * * */
 /* Setup the car app * * * * * * * */
 /* * * * * * * * * * * * * * * * * */
 void AppFunction::Init(void) {
-    bool res_error = true;
     Serial.begin(9600);
-
     MyDriver.Init();
+    ultrasonic.Init();
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -36,6 +29,12 @@ void AppFunction::Init(void) {
 void AppFunction::MoveTheCar(uint8_t movement){
     switch (movement) {
         case btnForward:
+            // do not move forward unless there are no obstacles
+            if (hasObstacles()) {
+                Serial.println("no movement will occur due to obstacles");
+                return;
+            }
+
             AppMotor.GoForward(speed);
             break;
         case btnBackward:
@@ -88,9 +87,24 @@ uint8_t AppFunction::ReceiveCommandFromController(void) {
     return Button_pressed;
 }
 
+
 /* * * * * * * * * * * * * * * */
 /* Stop the car  * * * * * * * */
 /* * * * * * * * * * * * * * * */
 void AppFunction::StopTheCar(void) {
     AppMotor.Stop();
+}
+
+
+/* * * * * * * * * * * * * * * * * * * * * * */
+/* Check for obstacles with ultrasound   * * */
+/* * * * * * * * * * * * * * * * * * * * * * */
+bool AppFunction::hasObstacles(void) {
+    uint16_t distance = ultrasonic.Get();
+    if (distance < minDistance) {
+        Serial.println("there is an obstacle ahead. Min distance is: " + String(minDistance) + ", current: " + String(distance));
+        return true;
+    }
+
+    return distance < minDistance;
 }

@@ -4,6 +4,7 @@
 
 #ifndef _APP_FUNCTION_H
 #define _APP_FUNCTION_H
+
 #include <arduino.h>
 
 enum ButtonCommands
@@ -26,6 +27,8 @@ class AppFunction {
         uint8_t ReceiveCommandFromController(void);
         void MoveTheCar(uint8_t movement);
         void StopTheCar(void);
+    private:
+        bool hasObstacles(void);
 };
 
 extern AppFunction MyApp;

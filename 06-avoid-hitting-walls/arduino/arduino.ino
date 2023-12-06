@@ -7,6 +7,7 @@
 /* Variables for all Modes * * * * */
 /* * * * * * * * * * * * * * * * * */
 bool modeLoopedAtLeastOnce = false;
+// AppFunction MyApp;
 
 /* * * * * * * * * * * * * * * * * */
 /* Variables for Free Mode * * * * */
@@ -51,19 +52,18 @@ void setup() {
   Serial.begin(9600);
 
   MyApp.Init();
+
   Serial.println(" > > > > > > > > > > > > > > > > > > > > >");
   Serial.println(" > > > > > > > > > > > > > > > > > > > > >");
   Serial.println(" > > > > ELEGOO CAR  > > > > > > >");
   Serial.println(" > > > > > > > > > > > > > > > > > > > > >");
   Serial.println(" > > > > > > > > > > > > > > > > > > > > >");
-
   Serial.println("The car will start in Free Mode.");
 }
 
 /* * * * * * * * * * * * * * * * * */
 /* * * * * Main Loop * * * * * * * */
 /* * * * * * * * * * * * * * * * * */
-
 void loop() {  
   switch (carMode) {
     case modeFree:

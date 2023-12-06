@@ -52,5 +52,7 @@ class Driver {
   // #define BUTTON_9_B 71952287
 };
 
+// todo: check why this does not work like it does on the other classes
+// extern Driver MyDriver;
 #endif
 
