@@ -108,3 +108,8 @@ bool AppFunction::hasObstacles(void) {
 
     return distance < minDistance;
 }
+
+void AppFunction::ChangeSpeed(uint8_t newSpeed) {
+  speed = newSpeed;
+  Serial.println("speed was set to: " + String(newSpeed));
+}

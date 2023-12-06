@@ -7,14 +7,13 @@
 /* Variables for all Modes * * * * */
 /* * * * * * * * * * * * * * * * * */
 bool modeLoopedAtLeastOnce = false;
-// AppFunction MyApp;
 
 /* * * * * * * * * * * * * * * * * */
 /* Variables for Free Mode * * * * */
 /* * * * * * * * * * * * * * * * * */
 unsigned long startTime = 0;
-const unsigned int delayForShortMovement = 500;  // 500 ms for spinning left or right
-const unsigned int delayForLongMovement = 750;   // 700 ms for forward and backward
+unsigned int delayForShortMovement = 500;  // 500 ms for spinning left or right
+unsigned int delayForLongMovement = 750;   // 700 ms for forward and backward
 bool countingDown = false;
 uint8_t lastButtonPressed;
 Timeout beginningOfMovement;
@@ -273,8 +272,19 @@ bool moveFromSerial() {
   } else if (movement == "left") {
     lastButtonPressed = btnLeft; 
   } else if (movement == "right") {
-    lastButtonPressed = btnRight; 
-  } else {
+    lastButtonPressed = btnRight;
+  } else if (movement.startsWith("speed")) {
+    int newSpeed = extractInteger(movement, "speed");
+    MyApp.ChangeSpeed(newSpeed);
+  } else if (movement.startsWith("delayMove")) {
+    int newDelay = extractInteger(movement, "delayMove");
+    delayForLongMovement = newDelay;
+    Serial.println("delay to move: " + String(newDelay));
+  } else if (movement.startsWith("delayTurn")) {
+    int newDelay = extractInteger(movement, "delayTurn");
+    delayForShortMovement = newDelay;
+    Serial.println("delay to turn: " + String(newDelay));
+  }  else {
     Serial.print("No movement matches: ");
     Serial.println(movement);
     
@@ -286,6 +296,10 @@ bool moveFromSerial() {
   return true;
 }
 
+int extractInteger(String str, String prefix) {
+  String numericPart = str.substring(prefix.length());
+  return numericPart.toInt();
+}
 
 /* * * * * * * * * * * * * * * * * * * * * */
 /* Check whether the movement is valid * * */

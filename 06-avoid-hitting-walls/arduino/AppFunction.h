@@ -27,9 +27,11 @@ class AppFunction {
         uint8_t ReceiveCommandFromController(void);
         void MoveTheCar(uint8_t movement);
         void StopTheCar(void);
+        void ChangeSpeed(uint8_t);
     private:
         bool hasObstacles(void);
 };
 
 extern AppFunction MyApp;
+
 #endif //_APP_FUNCTION_H
