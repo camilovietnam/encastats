@@ -287,7 +287,6 @@ bool moveFromSerial() {
   }  else {
     Serial.print("No movement matches: ");
     Serial.println(movement);
-    
     return false;
   }
 

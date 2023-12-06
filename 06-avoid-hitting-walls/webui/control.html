@@ -64,13 +64,13 @@
 
         <div class="row">
           <div class="col col-5 text-right">
-            <button class="btn btn-primary" onclick="sendCommand('/left')">Left</button>
+            <button class="btn btn-success" onclick="sendCommand('/left')">Left</button>
           </div>
           <div class="col col-2">
             <img id="loadingGif" src="loading.gif" alt="Loading...">
           </div>
           <div class="col col-5 text-left">
-            <button class="btn btn-primary" onclick="sendCommand('/right')">Right</button>
+            <button class="btn btn-success" onclick="sendCommand('/right')">Right</button>
           </div>
         </div>
         <div class="row">
@@ -130,10 +130,54 @@
             <button type="button" class="btn btn-primary" onclick="sendDelayTurn()">Set Delay Turn</button>
           </div>
         </div>
+
+        <!--   typical movement delay   -->
+        <div class="row">
+          <div class="col text-left">
+            Movement:
+          </div>
+        </div>
+        <div class="row border border-secondary form-group rounded">
+          <div class="col form-inline">
+            <button type="button" class="btn btn-primary" onclick="sendDelayMove(300)">300</button>
+          </div>
+          <div class="col form-inline">
+            <button type="button" class="btn btn-primary" onclick="sendDelayMove(750)">750</button>
+          </div>
+          <div class="col text-right">
+            <button type="button" class="btn btn-primary" onclick="sendDelayMove(1000)">1000</button>
+          </div>
+          <div class="col text-right">
+            <button type="button" class="btn btn-primary" onclick="sendDelayMove(2000)">2000</button>
+          </div>
+        </div>
+
+        <!--   typical turn delay   -->
+        <div class="row">
+          <div class="col text-left">
+            Turn:
+          </div>
+        </div>
+        <div class="row border border-secondary form-group rounded">
+          <div class="col form-inline">
+            <button type="button" class="btn btn-success" onclick="sendDelayTurn(250)">250</button>
+          </div>
+          <div class="col form-inline">
+            <button type="button" class="btn btn-success" onclick="sendDelayTurn(500)">500</button>
+          </div>
+          <div class="col text-right">
+            <button type="button" class="btn btn-success" onclick="sendDelayTurn(700)">700</button>
+          </div>
+          <div class="col text-right">
+            <button type="button" class="btn btn-success" onclick="sendDelayTurn(1000)">1000</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+
 
 
 <script>
@@ -171,13 +215,17 @@
     sendCommand("/speed/" + speed);
   }
 
-  function sendDelayMove() {
-    const delay = document.getElementById("input_delay_move").value;
+  function sendDelayMove(delay) {
+    if (!delay) {
+      delay = document.getElementById("input_delay_move").value;
+    }
     sendCommand("/delayMove/" + delay);
   }
 
-  function sendDelayTurn() {
-    const delay = document.getElementById("input_delay_turn").value;
+  function sendDelayTurn(delay) {
+    if (!delay) {
+      delay = document.getElementById("input_delay_turn").value;
+    }
     sendCommand("/delayTurn/" + delay);
   }
 
