@@ -26,10 +26,10 @@ export default {
 
         await this.sendTelegramMessage("Worker executed a cron event");
         ctx.waitUntil(this.checkRoverAlive());
-        // ctx.waitUntil(doSomeTaskOnASchedule());
     },
 
-    async fetch(request, env, ctx) {
+	// this is the entrypoint for the Cloudflare worker. All requests will be processed by this.
+    async fetch(request, env) {
         this.KV = env.KV_ROVER;
 
         // Handle preflight OPTIONS request - used to allow requests incoming
@@ -40,13 +40,13 @@ export default {
 
         this.bot_token = env.BOT_TOKEN;
         if (this.bot_token === '') {
-            return errNoToken();
+            return this.errNoToken();
         }
 
         const { pathname } = new URL(request.url);
 
         if (request.body == null) {
-            return errNoBody();
+            return this.errNoBody();
         }
 
         const body = await request.json();
@@ -66,14 +66,22 @@ export default {
     async routeAndProcessRequest(body: any) {
         console.log("Switch: " + body.message.text);
         switch(body.message.text) {
-            case "state": case "return state":
-                return this.returnState();
-            case "turn on":
-                return this.turnOn(body);
-            case "turn off":
-                return this.turnOff();
-            case "ping":
-                return this.ping();
+						case "state": case "return state":
+								return this.returnState();
+						case "turn on":
+								return this.turnOn(body);
+						case "turn off":
+								return this.turnOff();
+						case "ping":
+								return this.ping();
+						case "forward": case "backward": case "left": case "right":
+								return this.storeMovement(body.message.text);
+						case "photo":
+								return this.storeMovement("photo");
+						case "list":
+								return this.listMovements();
+						case "clear":
+								return this.clearBuffer();
             default:
                 await this.sendTelegramMessage(`I don't understand what you want: "${body.message.text}'`)
         }
@@ -81,12 +89,42 @@ export default {
         return new Response("I don't understand what you want.");
     },
 
+		async clearBuffer() {
+				const datos = [];
+				const buffer = new TextEncoder().encode(JSON.stringify(datos)).buffer;
+				this.KV.put('movements', buffer);
+
+				await this.sendTelegramMessage('The buffer was cleared');
+				return okResponse();
+		},
+
+		async storeMovement(command: string) {
+			const oldList = await this.KV.get('movements', 'arrayBuffer');
+			const stringList= new TextDecoder().decode(new Uint8Array(oldList));
+			const arrayList = JSON.parse(stringList);
+
+			arrayList.push(command)
+			const buffer = new TextEncoder().encode(JSON.stringify(arrayList)).buffer;
+			await this.KV.put('movements', buffer);
+
+			await this.sendTelegramMessage(`Command stored: ${command}`);
+			return okResponse();
+		},
+
+		async listMovements() {
+				const movements = await this.KV.get('movements', 'arrayBuffer');
+				const list= new TextDecoder().decode(new Uint8Array(movements));
+
+				await this.sendTelegramMessage(`${list}`);
+				return jsonResponse({'message': 'ok'});
+		},
+
     async returnState() {
         const now = new Date();
         const state = await this.KV.get("state");
 
         await this.sendTelegramMessage(`The rover is: ${state}. [${now.toLocaleString()}]`);
-        return jsonResponse({"state": state, "message": `The rover is: ${state}`});
+        return jsonResponse({'state': state, 'message': `The rover is: ${state}`});
     },
 
     async turnOn(body: any) {
@@ -172,10 +210,29 @@ export default {
             await this.sendTelegramMessage(`The bot was turned off after a period of inactivity [${now.toLocaleString()}]`);
             console.log("Robot state set to off due to inactivity");
         }
-    }
-}
+    },
 
-// The following functions don't require any information from the worker
+		async errNoToken() {
+			await this.sendTelegramMessage("Missing bot token. Check the configuration of your Cloudflare worker.");
+		},
+
+		async errNoBody() {
+			await this.sendTelegramMessage("Missing request body.");
+		}
+} // end of class
+
+// The following functions don't require any information from the worker so they can be declared
+// outside of the object
+
+function okResponse() {
+	return new Response("OK", {
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		status: 200,
+		statusText: "OK"
+	});
+}
 
 function jsonResponse(responseObject) {
     const jsonResponse = JSON.stringify(responseObject);
@@ -191,13 +248,6 @@ function extractChatIdFromBody(body) {
     return body.message && body.message.chat && body.message.chat.id;
 }
 
-async function errNoToken() {
-    await this.sendTelegramMessage("Missing bot token. Check the configuration of your Cloudflare worker.");
-}
-
-async function errNoBody() {
-    await this.sendTelegramMessage("Missing request body.");
-}
 
 function optionsRequest() {
     return new Response(null, {
