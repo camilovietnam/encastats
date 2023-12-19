@@ -65,6 +65,7 @@ export default {
 
     async routeAndProcessRequest(body: any) {
         console.log("Switch: " + body.message.text);
+
         switch(body.message.text) {
 						case "state": case "return state":
 								return this.returnState();
@@ -80,6 +81,8 @@ export default {
 								return this.storeMovement("photo");
 						case "list":
 								return this.listMovements();
+						case "rawlist":
+							return this.rawListMovements();
 						case "clear":
 								return this.clearBuffer();
             default:
@@ -90,8 +93,8 @@ export default {
     },
 
 		async clearBuffer() {
-				const datos = [];
-				const buffer = new TextEncoder().encode(JSON.stringify(datos)).buffer;
+				const emptyArray = [];
+				const buffer = new TextEncoder().encode(JSON.stringify(emptyArray)).buffer;
 				this.KV.put('movements', buffer);
 
 				await this.sendTelegramMessage('The buffer was cleared');
@@ -115,8 +118,33 @@ export default {
 				const movements = await this.KV.get('movements', 'arrayBuffer');
 				const list= new TextDecoder().decode(new Uint8Array(movements));
 
+				console.log(`This is the list of movements from KV: ${list}`);
 				await this.sendTelegramMessage(`${list}`);
-				return jsonResponse({'message': 'ok'});
+
+				return jsonResponse({'message': list});
+		},
+
+		async rawListMovements() {
+			const movements:ArrayBuffer = await this.KV.get('movements', 'arrayBuffer');
+
+			// clear the array of movements
+			await this.KV.delete('movements');
+
+			const mvs = await this.KV.get('movements');
+			console.log('These are the movements you got: ' + mvs);
+
+			const text = new TextDecoder().decode(movements);
+			// console.log('This is the text');
+			// console.log(text);
+
+			// const list= new TextDecoder().decode(new Uint8Array(movements));
+			const jsonData = JSON.parse(text);
+			// console.log('This is the json data:');
+			// console.log(jsonData);
+
+			let joined = jsonData.join(',');
+
+			return jsonResponse(joined);
 		},
 
     async returnState() {
@@ -137,7 +165,7 @@ export default {
             this.sendTelegramMessage(`The rover was turned on [${now.toLocaleString()}]. ${body.message.info ?? ''}`),
         ]);
 
-        console.log(`I set the last ping timestamp to: ${timestamp}`);
+        // console.log(`I set the last ping timestamp to: ${timestamp}`);
 
         return jsonResponse({"state": "on", "message": "The rover was turned on"});
     },
@@ -172,8 +200,8 @@ export default {
         const apiUrl = `https://api.telegram.org/bot${this.bot_token}/sendMessage`;
 
         try {
-            console.log(`Fetching: ${apiUrl}`);
-            console.log(`Message: ${message}`);
+            // console.log(`Fetching: ${apiUrl}`);
+            // console.log(`Message: ${message}`);
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {  'Content-Type': 'application/json' },
@@ -184,7 +212,7 @@ export default {
             })
 
             const responseBody = await response.text();
-            console.log('Telegram API Response:', responseBody);
+            // console.log('Telegram API Response:', responseBody);
         } catch (e) {
             console.log("Something went wrong calling the Telegram API: " + e);
         }

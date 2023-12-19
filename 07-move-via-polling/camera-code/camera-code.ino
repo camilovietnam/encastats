@@ -14,19 +14,18 @@
 #include "Camera.h"
 #include "esp_camera.h"
 #include "Polling.h"
-#include <WiFi.h>
+#include "Cloudflare.h"
 
+// define the ports for the Serial port that connects to the UNO R3 board
 #define RXD2 33
 #define TXD2 4
 
 CameraWebServer_AP CameraWebServerAP;
 CommandWebServer CommandWebServer;
 Polling polling;
+Cloudflare cloudflare;
 
-bool WA_en = false;
-
-#define RXD2 33
-#define TXD2 4
+// bool WA_en = false;
 
 void setup()
 {
@@ -41,16 +40,18 @@ void setup()
   CommandWebServer.Begin();
 
   // give time to the program to finish before starting the ping
-  delay(500);
+  cloudflare.SendTurnOnNotification();
+
+//   delay(500);
 }
 
 // Ping
 unsigned long lastPingTime = 0;
-unsigned long pingInterval = 1000; // How many milliseconds to wait for each ping
+unsigned long pingInterval = 2000; // How many milliseconds to wait for each ping
 
 // Poll
 unsigned long lastPollingTime = 0;
-unsigned long pollInterval = 3000; // How many milliseconds to wait for each data poll
+unsigned long pollInterval = 4000; // How many milliseconds to wait for each data poll
 
 void loop()
 {
@@ -58,10 +59,7 @@ void loop()
   unsigned long currentTime = millis();
 
   if (currentTime - lastPingTime >= pingInterval) {
-    // todo: restore ping
-    Serial.println("camera ping: Serial");
-    Serial2.println("camera ping: Serial2");
-    // CameraWebServerAP.PingWorker();
+    // cloudflare.Ping();
     lastPingTime = millis();
 
     if (pingInterval < 10000) {
@@ -71,8 +69,11 @@ void loop()
 
   // Check if we need to poll
   if (currentTime - lastPollingTime >= pollInterval) {
-      String movements = polling.ListMovements();
-      Serial.println("polling");
+      std::vector<String> movements = cloudflare.Poll();
+      for (const auto& movement : movements) {
+        Serial.println(movement);
+        Serial2.println(movement);
+      }
       lastPollingTime = millis();
   }
 }

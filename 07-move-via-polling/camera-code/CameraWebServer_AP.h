@@ -26,11 +26,11 @@ class CameraWebServer_AP
 
 public:
   void CameraWebServer_AP_Init(void);
-  void PingWorker(void);
-  String wifi_name;  
+//  void PingWorker(void);
+  String wifi_name;
 private:
   void connectToWifi();
-  void sendTurnOnRequest();
+//  void sendTurnOnRequest();
 };
 
 #endif
