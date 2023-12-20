@@ -13,7 +13,6 @@
 #include "CommandWebServer.h"
 #include "Camera.h"
 #include "esp_camera.h"
-#include "Polling.h"
 #include "Cloudflare.h"
 
 // define the ports for the Serial port that connects to the UNO R3 board
@@ -22,7 +21,6 @@
 
 CameraWebServer_AP CameraWebServerAP;
 CommandWebServer CommandWebServer;
-Polling polling;
 Cloudflare cloudflare;
 
 // bool WA_en = false;
@@ -47,11 +45,11 @@ void setup()
 
 // Ping
 unsigned long lastPingTime = 0;
-unsigned long pingInterval = 2000; // How many milliseconds to wait for each ping
+unsigned long pingInterval = 5000; // How many milliseconds to wait for each ping
 
 // Poll
 unsigned long lastPollingTime = 0;
-unsigned long pollInterval = 4000; // How many milliseconds to wait for each data poll
+unsigned long pollInterval = 500; // How many milliseconds to wait for each data poll
 
 void loop()
 {
@@ -59,7 +57,7 @@ void loop()
   unsigned long currentTime = millis();
 
   if (currentTime - lastPingTime >= pingInterval) {
-    // cloudflare.Ping();
+    cloudflare.Ping();
     lastPingTime = millis();
 
     if (pingInterval < 10000) {
@@ -69,9 +67,8 @@ void loop()
 
   // Check if we need to poll
   if (currentTime - lastPollingTime >= pollInterval) {
-      std::vector<String> movements = cloudflare.Poll();
-      for (const auto& movement : movements) {
-        Serial.println(movement);
+      String movement = cloudflare.Poll();
+      if (!movement.isEmpty()) {
         Serial2.println(movement);
       }
       lastPollingTime = millis();

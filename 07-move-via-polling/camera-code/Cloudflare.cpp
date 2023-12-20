@@ -40,13 +40,13 @@ void Cloudflare::Ping(void) {
 /* * * * * * * * * * * * * * * * * * * * * * */
 /* * *  Poll the worker  * * * * * * * * * * */
 /* * * * * * * * * * * * * * * * * * * * * * */
-std::vector<String> Cloudflare::Poll(void) {
+String Cloudflare::Poll(void) {
   // Serial.println("polling worker");
   HTTPClient http;
   std::ostringstream requestBodyStream;
-  std::vector<String> vectorMovements;
+  String movement;
 
-  requestBodyStream << "{\"message\":{\"chat\":{\"id\":" << TELEGRAM_CHAT_ID << "},\"text\":\"rawlist\"}}";
+  requestBodyStream << "{\"message\":{\"chat\":{\"id\":" << TELEGRAM_CHAT_ID << "},\"text\":\"poll\"}}";
 
 //  Serial.print("Calling URL: ");
 //  Serial.println(CLOUDFLARE_WORKER_URL);
@@ -56,42 +56,27 @@ std::vector<String> Cloudflare::Poll(void) {
   // Get the concatenated string
   std::string requestBody = requestBodyStream.str();
 
+  unsigned long start = millis();
   http.begin(CLOUDFLARE_WORKER_URL);
   http.addHeader("Content-Type", "application/json");
 
   int httpResponseCode = http.POST(requestBody.c_str());
 
   if (httpResponseCode > 0) {
-//    Serial.print("HTTP Response code: ");
-//    Serial.println(httpResponseCode);
-
-    String response = http.getString();
-    http.end();
-
-    response = response.substring(1, response.length() - 1); // remove double quotes
-
-    const char *inputCharArray = response.c_str();
-    char *token = strtok(const_cast<char*>(inputCharArray), ",");
-
-    // if no movements, finish
-    if (!token) {
-      // Serial.println("No movements.");
-      http.end();
-      return vectorMovements;
-    }
-
-    // extract each token and send it via Serial2
-    while (token != NULL) {
-      vectorMovements.push_back(token);
-//      Serial2.println(token);
-      token = strtok(NULL, ",");
-    }
+    movement = http.getString();
+    movement = movement.substring(1, movement.length() - 1); // remove double quotes
   } else {
     Serial.print("HTTP Request failed. Error code: ");
     Serial.println(httpResponseCode);
   }
+  
+  http.end();
 
-  return  vectorMovements;
+  if (movement == "photo") {
+
+  }
+
+  return movement;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * */

@@ -53,7 +53,7 @@ export default {
         this.chatID = extractChatIdFromBody(body);
 
         if (body && body.message && body.message.text) {
-            console.log(`here is the chat text: ${body.message.text}`);
+            // console.log(`here is the chat text: ${body.message.text}`);
         } else {
             console.log("One of the objects is not defined.");
             await this.sendTelegramMessage("Could not read text of the message.")
@@ -64,7 +64,7 @@ export default {
     },
 
     async routeAndProcessRequest(body: any) {
-        console.log("Switch: " + body.message.text);
+        // console.log("Switch: " + body.message.text);
 
         switch(body.message.text) {
 						case "state": case "return state":
@@ -79,12 +79,10 @@ export default {
 								return this.storeMovement(body.message.text);
 						case "photo":
 								return this.storeMovement("photo");
-						case "list":
-								return this.listMovements();
-						case "rawlist":
-							return this.rawListMovements();
-						case "clear":
-								return this.clearBuffer();
+						case 'poll':
+								return this.poll();
+						case 'list':
+								return this.list();
             default:
                 await this.sendTelegramMessage(`I don't understand what you want: "${body.message.text}'`)
         }
@@ -92,59 +90,30 @@ export default {
         return new Response("I don't understand what you want.");
     },
 
-		async clearBuffer() {
-				const emptyArray = [];
-				const buffer = new TextEncoder().encode(JSON.stringify(emptyArray)).buffer;
-				this.KV.put('movements', buffer);
-
-				await this.sendTelegramMessage('The buffer was cleared');
-				return okResponse();
-		},
-
 		async storeMovement(command: string) {
-			const oldList = await this.KV.get('movements', 'arrayBuffer');
-			const stringList= new TextDecoder().decode(new Uint8Array(oldList));
-			const arrayList = JSON.parse(stringList);
-
-			arrayList.push(command)
-			const buffer = new TextEncoder().encode(JSON.stringify(arrayList)).buffer;
-			await this.KV.put('movements', buffer);
-
+			await this.KV.put('movement', command);
 			await this.sendTelegramMessage(`Command stored: ${command}`);
 			return okResponse();
 		},
 
-		async listMovements() {
-				const movements = await this.KV.get('movements', 'arrayBuffer');
-				const list= new TextDecoder().decode(new Uint8Array(movements));
+		async poll() {
+				let movement = await this.KV.get('movement');
+				// await this.sendTelegramMessage('Poll start: ' + movement);
 
-				console.log(`This is the list of movements from KV: ${list}`);
-				await this.sendTelegramMessage(`${list}`);
+				console.log(`Movement is: ${movement}`)
+				await this.KV.put('movement', '');
 
-				return jsonResponse({'message': list});
+				const movementNew = await this.KV.get('movement');
+				// await this.sendTelegramMessage('Poll end: ' + movementNew);
+
+				return jsonResponse(movement);
 		},
 
-		async rawListMovements() {
-			const movements:ArrayBuffer = await this.KV.get('movements', 'arrayBuffer');
+		async list() {
+			const movement = await this.KV.get('movement');
+			await this.sendTelegramMessage('List:' + movement);
 
-			// clear the array of movements
-			await this.KV.delete('movements');
-
-			const mvs = await this.KV.get('movements');
-			console.log('These are the movements you got: ' + mvs);
-
-			const text = new TextDecoder().decode(movements);
-			// console.log('This is the text');
-			// console.log(text);
-
-			// const list= new TextDecoder().decode(new Uint8Array(movements));
-			const jsonData = JSON.parse(text);
-			// console.log('This is the json data:');
-			// console.log(jsonData);
-
-			let joined = jsonData.join(',');
-
-			return jsonResponse(joined);
+			return jsonResponse({'movement': movement});
 		},
 
     async returnState() {
