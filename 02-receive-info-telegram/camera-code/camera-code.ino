@@ -9,13 +9,16 @@
 
 #include "CameraWebServer_AP.h"
 #include "CommandWebServer.h"
-#include <WiFi.h>
+#include "WifiClient.h"
+
+// #include <WiFi.h>
 #include "esp_camera.h"
 
 #define RXD2 33
 #define TXD2 4
 CameraWebServer_AP CameraWebServerAP;
 CommandWebServer CommandWebServer;
+WifiClient MyWifi;
 
 bool WA_en = false;
 
@@ -27,6 +30,7 @@ void setup()
   Serial.begin(9600);
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
 
+  // MyWifi.connect();
   CameraWebServerAP.CameraWebServer_AP_Init();
 
   // give time to the program to finish

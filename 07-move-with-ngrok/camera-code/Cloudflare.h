@@ -12,7 +12,6 @@
 class Cloudflare {
   public:
     void Ping(void);
-    String Poll(void);
     void SendTurnOnNotification(void);
 };
 #endif

@@ -8,14 +8,15 @@
 #define CAMERA_MODEL_M5STACK_WIDE
 
 #include "esp_camera.h"
-#include <WiFi.h>
 #include "camera_pins.h"
 #include "esp_system.h"
+
+#include <WiFi.h>
 
 class Camera {
   public:
     static void Init(void);
-    static void takePhoto(void);
+    static camera_fb_t* TakePhoto(void);
   private:
     static camera_config_t loadConfig(void);
 };

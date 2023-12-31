@@ -1,27 +1,6 @@
+#include "WifiClient.h"
 
-// WARNING!!! Make sure that you have selected Board ---> ESP32 Dev Module
-//            Partition Scheme ---> Huge APP (3MB No OTA/1MB SPIFFS)
-//            PSRAM ---> enabled
-
-#define CAMERA_MODEL_M5STACK_WIDE
-
-#include "CameraWebServer_AP.h"
-#include "credentials.h"
-
-void startCameraServer();
-
-/* * * * * * * * * * * * * * * * * * * * * * */
-/* * *  Initialize the Camera Server * * * * */
-/* * * * * * * * * * * * * * * * * * * * * * */
-void CameraWebServer_AP::CameraWebServer_AP_Init(void)
-{
-  connectToWifi();
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * */
-/* * *  Connect to the wifi  * * * * * * * * */
-/* * * * * * * * * * * * * * * * * * * * * * */
-void CameraWebServer_AP::connectToWifi() {
+void WifiClient::connect() {
   uint64_t chipid = ESP.getEfuseMac();
   char string[10];
   sprintf(string, "%04X", (uint16_t)(chipid >> 32));
@@ -35,7 +14,7 @@ void CameraWebServer_AP::connectToWifi() {
   Serial.print("wifi_name:");
   Serial.println(mac_default);
   Serial.println(":----------------------------:");
-  wifi_name = mac0_default + mac1_default;
+  String wifi_name = mac0_default + mac1_default;
 
   WiFi.begin(SSID, PASSWORD);
 
@@ -47,11 +26,7 @@ void CameraWebServer_AP::connectToWifi() {
   Serial.println("\nConnected to WiFi");
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
-
-  startCameraServer();
-
   Serial.print("Camera server is ready! Use 'http://");
   Serial.print(WiFi.localIP());
   Serial.println("' to connect");
 }
-

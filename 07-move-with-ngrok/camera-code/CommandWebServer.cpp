@@ -12,7 +12,7 @@
 
 #include "img_converters.h"
 
-Camera camera;
+//Camera camera;
 
 AsyncWebServer CommandWebServer::server(8080);
 
@@ -22,7 +22,7 @@ void CommandWebServer::Begin() {
   server.onNotFound(handleRequest);
 
   // Initialize the camera
-  camera.Init();
+  //  camera.Init();
 
   // Begin the server
   server.begin();

@@ -7,11 +7,6 @@
 void Camera::Init() {
   camera_config_t config = loadConfig();
 
-  // #if defined(CAMERA_MODEL_ESP_EYE)
-  //   pinMode(13, INPUT_PULLUP);
-  //   pinMode(14, INPUT_PULLUP);
-  // #endif
-
   // camera init
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK)
@@ -31,9 +26,6 @@ void Camera::Init() {
 #endif
   s->set_vflip(s, 0);   //图片方向设置（上下）
   s->set_hmirror(s, 0); //图片方向设置（左右）
-
-  // s->set_vflip(s, 1);   //图片方向设置（上下）
-  // s->set_hmirror(s, 1); //图片方向设置（左右）
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * */
@@ -78,6 +70,13 @@ camera_config_t Camera::loadConfig(void) {
   return config;
 }
 
-void Camera::takePhoto(void) {
-  Serial.println("took a photo");
+camera_fb_t* Camera::TakePhoto(void) {
+  camera_fb_t *fb = NULL;
+  fb = esp_camera_fb_get();
+
+  if (!fb) {
+    Serial.println("error: not fb");
+  }
+
+  return fb;
 }
