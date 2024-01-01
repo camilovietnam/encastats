@@ -12,13 +12,12 @@
 
 #include "img_converters.h"
 
-//Camera camera;
-
+// Camera camera;
 AsyncWebServer CommandWebServer::server(8080);
 
 void CommandWebServer::Begin() {
   // generic http handler
-  server.on("/takePhoto", HTTP_GET, handleCapture);
+  server.on("/photo", HTTP_GET, handlePhoto);
   server.onNotFound(handleRequest);
 
   // Initialize the camera
@@ -46,8 +45,7 @@ void CommandWebServer::handleCors(AsyncWebServerResponse *response) {
   response->addHeader("Access-Control-Allow-Headers", "*");
 }
 
-void CommandWebServer::handleCapture(AsyncWebServerRequest *request) {
-    Serial.println("handleCapture");
+void CommandWebServer::handlePhoto(AsyncWebServerRequest *request) {
     AsyncWebServerResponse *response;
     camera_fb_t *fb = NULL;
 

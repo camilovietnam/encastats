@@ -20,7 +20,7 @@ private:
   static AsyncWebServer server;
   static void handleRequest(AsyncWebServerRequest *request);
   static void handleCors(AsyncWebServerResponse *response);
-  static void handleCapture(AsyncWebServerRequest *request);
+  static void handlePhoto(AsyncWebServerRequest *request);
 };
 
 #endif
