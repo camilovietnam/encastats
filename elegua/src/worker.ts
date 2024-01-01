@@ -17,7 +17,7 @@ export default {
     chatID: '',             // will be read from the bot message
     bot_token: '',          // will be read from the worker environment variables
     KV: null,								// stores values like the robot state, also the list of movements?
-														// todo: remove it, we can store movements in the global scope
+    // todo: remove it, we can store movements in the global scope
 
     // This will receive the scheduled ping event
     async scheduled(event, env, ctx) {
@@ -36,7 +36,7 @@ export default {
         ctx.waitUntil(this.checkRoverAlive());
     },
 
-	// this is the entrypoint for the Cloudflare worker. All requests will be processed by this.
+    // this is the entrypoint for the Cloudflare worker. All requests will be processed by this.
     async fetch(request, env) {
         this.KV = env.KV_ROVER;
 
@@ -68,37 +68,35 @@ export default {
             return new Response('Could not read text of the message');
         }
 
-        return this.routeAndProcessRequest(body);
+        return this.routeAndProcessRequest(env, body);
     },
 
-    async routeAndProcessRequest(body: any) {
+    async routeAndProcessRequest(env: any, body: any) {
         console.log("Switch: " + body.message.text);
 
-				// First lets take care of the complex messages
-				if (body.message.text.startsWith('ngrok')) {
-					return this.updateNgrok(body.message.text);
-				}
+        // First lets take care of the complex messages
+        if (body.message.text.startsWith('ngrok')) {
+            return this.updateNgrok(body.message.text);
+        }
 
-				// First lets take care of the complex messages
-				if (body.message.text.startsWith('queue')) {
-						return this.queueCommand(body.message.text);
-				}
+        // First lets take care of the complex messages
+        if (body.message.text.startsWith('queue')) {
+            return this.queueCommand(body.message.text);
+        }
 
-        switch(body.message.text) {
-						case "state": case "return state":
-								return this.returnState();
-						case "turn on":
-								return this.turnOn(body);
-						case "turn off":
-								return this.turnOff();
-						case "ping":
-								return this.ping();
-						case "forward": case "backward": case "left": case "right":
-								return this.tellCar(body.message.text);
-						case "photo":
-								return this.storeMovement("photo");
-						case 'list':
-								return this.list();
+        switch (body.message.text) {
+            case "state": case "return state":
+                return this.returnState();
+            case "turn on":
+                return this.turnOn(body);
+            case "turn off":
+                return this.turnOff();
+            case "ping":
+                return this.ping();
+            case "forward": case "backward": case "left": case "right":
+                return this.tellCar(body.message.text);
+            case "photo":
+                return this.sendPhoto(env);
 
             default:
                 await this.sendTelegramMessage(`I don't understand what you want: "${body.message.text}'`)
@@ -107,125 +105,142 @@ export default {
         return new Response("I don't understand what you want.");
     },
 
-		async updateNgrok(text: string) {
-			if (text == "ngrok") {
-					const message = ngrokURL.length == 0
-					  ? "No Ngrok endpoint yet"
-					  : `Current Ngrok endpoint: ${ngrokURL}`;
-					await this.sendTelegramMessage(message)
-			} else {
-					ngrokURL = text.replace("ngrok ", "");
-					await this.sendTelegramMessage(`new Ngrok endpoint: ${ngrokURL}`)
-			}
+    async sendPhoto(env: any) {
+        const photoPath = `${ngrokURL}/photo`
+        const telegramApiUrl = `https://api.telegram.org/bot${env.BOT_TOKEN}/sendPhoto`;
 
-			return okResponse();
-		},
+        const formData = new FormData();
+        const randomString = Math.random().toString(36).substring(7);
 
-		async queueCommand(text: string) {
-		  // list all the movements in the queue
-			if (text == "queue") {
-				const message = movementQueue.length == 0
-						? 'The queue is empty'
-						: `Current queue: ${movementQueue.toString()}`;
-				await this.sendTelegramMessage(message);
-				return okResponse();
-			}
+        formData.append('chat_id', env.CHAT_ID);
+        formData.append('photo', `${photoPath}?${randomString}`);
 
-			if (text == 'queue clear') {
-				movementQueue = [];
-			  await this.sendTelegramMessage('The queue was cleared');
-			  return okResponse();
-			}
+        // Realizar la solicitud HTTP a la API de Telegram
+        const response = await fetch(telegramApiUrl, {
+            method: 'POST',
+            body: formData,
+        });
 
-		  if (text == 'queue process') {
-			  return this.processQueue();
-				// for (let movement of movementQueue) {
-				// 	await this.tellCar(movement);
-				//   await this.sendTelegramMessage(`Processed: ${movement}`);
-				// }
-				//
-				// movementQueue = [];
-				// await this.sendTelegramMessage('The queue is now empty');
-				// return okResponse();
-		  }
+        const a = await response.json();
 
-			// the queue is full
-			if (movementQueue.length >= (queueSize-1)) {
-					await this.sendTelegramMessage(`Queue is full`)
-					return okResponse();
-			}
+        if (!a.ok) {
+            return errResponse();
+        }
 
-			const movement = text.replace('queue ', '');
+        return okResponse();
+    },
 
-			// check if the movement is valid
-			if (invalidMovement(movement)) {
-					await this.sendTelegramMessage(`Invalid movement: ${movement}`)
-					return okResponse();
-			}
+    async updateNgrok(text: string) {
+        if (text == "ngrok") {
+            const message = ngrokURL.length == 0
+                ? "No Ngrok endpoint yet"
+                : `Current Ngrok endpoint: ${ngrokURL}`;
+            await this.sendTelegramMessage(message)
+        } else {
+            ngrokURL = text.replace("ngrok ", "");
+            await this.sendTelegramMessage(`new Ngrok endpoint: ${ngrokURL}`)
+        }
 
-			movementQueue.push(movement);
-			await this.sendTelegramMessage(`Movement was queued`)
-			return okResponse();
-		},
+        return okResponse();
+    },
 
-		async processQueue() {
-				for (let movement of movementQueue) {
-						await this.tellCar(movement);
-						await this.sendTelegramMessage(`Processed: ${movement}`);
-				}
+    async queueCommand(text: string) {
+        // list all the movements in the queue
+        if (text == "queue") {
+            const message = movementQueue.length == 0
+                ? 'The queue is empty'
+                : `Current queue: ${movementQueue.toString()}`;
+            await this.sendTelegramMessage(message);
+            return okResponse();
+        }
 
-				movementQueue = [];
-				await this.sendTelegramMessage('The queue is now empty');
-				return okResponse();
-		},
+        if (text == 'queue clear') {
+            movementQueue = [];
+            await this.sendTelegramMessage('The queue was cleared');
+            return okResponse();
+        }
 
-		async tellCar(text: string) {
-				const headers = new Headers();
-				headers.append("ngrok-skip-browser-warning", "skip");
+        if (text == 'queue process') {
+            return this.processQueue();
+        }
 
-				if (ngrokURL == "") {
-						await this.sendTelegramMessage('No Ngrok endpoint configured');
-						return okResponse();
-				}
+        // the queue is full
+        if (movementQueue.length >= (queueSize - 1)) {
+            await this.sendTelegramMessage(`Queue is full`)
+            return okResponse();
+        }
 
-				const url = `${ngrokURL}/${text}`;
-				console.log(`Calling ngrok URL: ${url}`);
+        const movement = text.replace('queue ', '');
 
-				await fetch(url, {
-						headers,
-				}).
-				then(response => {
-						if (!response.ok) {
-								throw new Error('Error in the request.');
-						}
-						console.log(`We told the car: ${text}`);
-				})
-				.catch(error => {
-						console.error('Error telling the car: ', error);
-				})
+        // check if the movement is valid
+        if (invalidMovement(movement)) {
+            await this.sendTelegramMessage(`Invalid movement: ${movement}`)
+            return okResponse();
+        }
 
-				return okResponse();
-		},
+        movementQueue.push(movement);
+        await this.sendTelegramMessage(`Movement was queued`)
+        return okResponse();
+    },
 
-		async storeMovement(command: string) {
-			await this.KV.put('movement', command);
-			await this.sendTelegramMessage(`Command stored: ${command}`);
-			return okResponse();
-		},
+    async processQueue() {
+        for (let movement of movementQueue) {
+            await this.tellCar(movement);
+            await this.sendTelegramMessage(`Processed: ${movement}`);
+        }
 
-		async list() {
-			const movement = await this.KV.get('movement');
-			await this.sendTelegramMessage('List:' + movement);
+        movementQueue = [];
+        await this.sendTelegramMessage('The queue is now empty');
+        return okResponse();
+    },
 
-			return jsonResponse({'movement': movement});
-		},
+    async tellCar(text: string) {
+        const headers = new Headers();
+        headers.append("ngrok-skip-browser-warning", "skip");
+
+        if (ngrokURL == "") {
+            await this.sendTelegramMessage('No Ngrok endpoint configured');
+            return okResponse();
+        }
+
+        const url = `${ngrokURL}/${text}`;
+        console.log(`Calling ngrok URL: ${url}`);
+
+        await fetch(url, {
+            headers,
+        }).
+            then(response => {
+                if (!response.ok) {
+                    throw new Error('Error in the request.');
+                }
+                console.log(`We told the car: ${text}`);
+            })
+            .catch(error => {
+                console.error('Error telling the car: ', error);
+            })
+
+        return okResponse();
+    },
+
+    async storeMovement(command: string) {
+        await this.KV.put('movement', command);
+        await this.sendTelegramMessage(`Command stored: ${command}`);
+        return okResponse();
+    },
+
+    async list() {
+        const movement = await this.KV.get('movement');
+        await this.sendTelegramMessage('List:' + movement);
+
+        return jsonResponse({ 'movement': movement });
+    },
 
     async returnState() {
         const now = new Date();
         const state = await this.KV.get("state");
 
         await this.sendTelegramMessage(`The rover is: ${state}. [${now.toLocaleString()}]`);
-        return jsonResponse({'state': state, 'message': `The rover is: ${state}`});
+        return jsonResponse({ 'state': state, 'message': `The rover is: ${state}` });
     },
 
     async turnOn(body: any) {
@@ -240,7 +255,7 @@ export default {
 
         // console.log(`I set the last ping timestamp to: ${timestamp}`);
 
-        return jsonResponse({"state": "on", "message": "The rover was turned on"});
+        return jsonResponse({ "state": "on", "message": "The rover was turned on" });
     },
 
     async turnOff() {
@@ -253,7 +268,7 @@ export default {
             this.sendTelegramMessage(`The rover was turned off [${now.toLocaleString()}]`),
         ]);
 
-        return jsonResponse({"state:": "off", "message": "The rover was turned off"});
+        return jsonResponse({ "state:": "off", "message": "The rover was turned off" });
     },
 
     async ping() {
@@ -261,9 +276,9 @@ export default {
         const now = new Date();
 
         // await Promise.all([
-            // this.KV.put("state", "on"),
-            // this.KV.put("last_ping_timestamp", timestamp),
-            // this.sendTelegramMessage(`[x] The rover 1 sent a ping [${now.toLocaleString()}]`),
+        // this.KV.put("state", "on"),
+        // this.KV.put("last_ping_timestamp", timestamp),
+        // this.sendTelegramMessage(`[x] The rover 1 sent a ping [${now.toLocaleString()}]`),
         // ])
 
         return new Response("Ok");
@@ -277,7 +292,7 @@ export default {
             // console.log(`Message: ${message}`);
             const response = await fetch(apiUrl, {
                 method: 'POST',
-                headers: {  'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: this.chatID,
                     text: message
@@ -313,26 +328,35 @@ export default {
         }
     },
 
-		async errNoToken() {
-			await this.sendTelegramMessage("Missing bot token. Check the configuration of your Cloudflare worker.");
-		},
+    async errNoToken() {
+        await this.sendTelegramMessage("Missing bot token. Check the configuration of your Cloudflare worker.");
+    },
 
-		async errNoBody() {
-			await this.sendTelegramMessage("Missing request body.");
-		}
+    async errNoBody() {
+        await this.sendTelegramMessage("Missing request body.");
+    }
 } // end of class
 
 // The following functions don't require any information from the worker so they can be declared
 // outside of the object
+function errResponse() {
+    return new Response("Error", {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        status: 500,
+        statusText: "Internal Error"
+    });
+}
 
 function okResponse() {
-	return new Response("OK", {
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		status: 200,
-		statusText: "OK"
-	});
+    return new Response("OK", {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        status: 200,
+        statusText: "OK"
+    });
 }
 
 function jsonResponse(responseObject) {
@@ -361,6 +385,6 @@ function optionsRequest() {
 }
 
 function invalidMovement(movement) {
-		const validMovements = ['forward', 'backward', 'left', 'right'];
-		return validMovements.indexOf(movement) == -1;
+    const validMovements = ['forward', 'backward', 'left', 'right'];
+    return validMovements.indexOf(movement) == -1;
 }
