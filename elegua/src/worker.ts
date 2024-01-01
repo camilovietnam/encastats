@@ -121,9 +121,9 @@ export default {
             body: formData,
         });
 
-        const a = await response.json();
+        const res = await response.json();
 
-        if (!a.ok) {
+        if (!res.ok) {
             return errResponse();
         }
 
@@ -222,19 +222,6 @@ export default {
         return okResponse();
     },
 
-    async storeMovement(command: string) {
-        await this.KV.put('movement', command);
-        await this.sendTelegramMessage(`Command stored: ${command}`);
-        return okResponse();
-    },
-
-    async list() {
-        const movement = await this.KV.get('movement');
-        await this.sendTelegramMessage('List:' + movement);
-
-        return jsonResponse({ 'movement': movement });
-    },
-
     async returnState() {
         const now = new Date();
         const state = await this.KV.get("state");
@@ -252,8 +239,6 @@ export default {
             this.KV.put("last_ping_timestamp", timestamp),
             this.sendTelegramMessage(`The rover was turned on [${now.toLocaleString()}]. ${body.message.info ?? ''}`),
         ]);
-
-        // console.log(`I set the last ping timestamp to: ${timestamp}`);
 
         return jsonResponse({ "state": "on", "message": "The rover was turned on" });
     },
@@ -288,8 +273,6 @@ export default {
         const apiUrl = `https://api.telegram.org/bot${this.bot_token}/sendMessage`;
 
         try {
-            // console.log(`Fetching: ${apiUrl}`);
-            // console.log(`Message: ${message}`);
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -299,7 +282,7 @@ export default {
                 })
             })
 
-            const responseBody = await response.text();
+            // const responseBody = await response.text();
             // console.log('Telegram API Response:', responseBody);
         } catch (e) {
             console.log("Something went wrong calling the Telegram API: " + e);
