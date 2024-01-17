@@ -17,7 +17,6 @@
 #include "Camera.h"
 #include "esp_camera.h"
 #include "Cloudflare.h"
-#include "Telegram.h"
 #include "WifiClient.h"
 
 // define the ports for the Serial port that connects to the UNO R3 board
@@ -27,10 +26,8 @@
 CommandWebServer commandWebServer;
 Cloudflare cloudflare;
 Camera camera;
-Telegram telegram;
 WifiClient wifiClient;
 
-// bool WA_en = false;
 #define CAMERA_MODEL_M5STACK_WIDE
 
 // Ping-related timestamps
@@ -69,7 +66,8 @@ void loop()
 
   // do we need to ping?
   if (currentTime - lastPingTime >= pingInterval) {
-    cloudflare.Ping();
+    // cloudflare.Ping();   lets not ping for now
+    Serial.println("Ping");
     lastPingTime = millis();
 
     if (pingInterval < 10000) {

@@ -16,8 +16,6 @@ let queueSize = 20;
 export default {
     chatID: '',             // will be read from the bot message
     bot_token: '',          // will be read from the worker environment variables
-    KV: null,								// stores values like the robot state, also the list of movements?
-    // todo: remove it, we can store movements in the global scope
 
     // This will receive the scheduled ping event
     async scheduled(event, env, ctx) {
@@ -234,7 +232,7 @@ export default {
         const timestamp = Date.now();
         const now = new Date(timestamp);
 
-        Promise.all([
+        await Promise.all([
             this.KV.put("state", "on"),
             this.KV.put("last_ping_timestamp", timestamp),
             this.sendTelegramMessage(`The rover was turned on [${now.toLocaleString()}]. ${body.message.info ?? ''}`),
