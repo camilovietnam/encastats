@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robot Movement Control</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <!-- Enlazar el archivo CSS de FontAwesome desde el CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+
+    #buttonTable {
+      margin: auto;
+      width: 600px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
+
+    #loading-gif {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      width: 40px;
+      height: 40px;
+      filter: invert(1);
+    }
+
+    img#photo {
+      width: 400px;
+      display: block;
+      margin: auto;
+    }
+
+    /* the network table */
+    .container-fluid.network {
+      width: 70%;
+      background-color: #f5f5f5;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .container-fluid.network .row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .container-fluid.network .col {
+      margin: 10px;
+    }
+
+    .container-fluid.network label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .container-fluid.network input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Arrows on the left side */
+    .col.arrows {
+      background-color: #ffefef;
+    }
+
+    /* Settings on the right side */
+    .col.settings {
+      background-color: #f5f5f5;
+    }
+
+    .w100 {
+      width: 100px!important;
+    }
+
+    .w400 {
+      width: 400px!important;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container-fluid network">
+  <div class="row">
+    <div class="col">
+      <label for="command-server-url">Server URL:</label>
+      <input type="text" id="command-server-url" value="http://192.168.0.20" style="width: 300px;">
+    </div>
+    <div class="col">
+      <label for="command-port">Command Port:</label>
+      <input type="text" id="command-port" value="8080" style="width: 100px;">
+    </div>
+    <div class="col">
+      <label for="stream-port">Stream Port:</label>
+      <input type="text" id="stream-port" value="81" style="width: 100px;">
+    </div>
+  </div>
+</div>
+
+
+<div class="container-fluid main m-2">
+  <div class="row">
+    <div class="col arrows">
+      <div class="container" id="buttonTable">
+        <div class="row">
+          <div class="col">
+            <button class="btn btn-primary" onclick="sendCommand('/forward')">
+              <i class="fas fa-arrow-up fa-lg"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col col-5 text-right">
+            <button class="btn btn-success" onclick="sendCommand('/left')">
+              <i class="fas fa-arrow-left fa-lg"></i>
+            </button>
+          </div>
+          <div class="col col-2">
+            <img id="loading-gif" src="loading.gif" alt="Loading...">
+          </div>
+          <div class="col col-5 text-left">
+            <button class="btn btn-success" onclick="sendCommand('/right')">
+              <i class="fas fa-arrow-right fa-lg"></i>
+            </button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <button class="btn btn-primary" onclick="sendCommand('/backward')">
+              <i class="fas fa-arrow-down fa-lg"></i>
+            </button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col text-right">
+            <button class="btn btn-info" onclick="takePhoto()">Take Photo</button>
+          </div>
+          <div class="col text-left">
+            <button class="btn btn-info" onclick="startStream()">Start Stream</button>
+          </div>
+        </div>
+        <div class="row text-center">
+          <div class="col">
+            <img style="display: none" id="photo" src="">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col settings">
+      <div class="container form">
+
+        <div class="row form-group w400">
+          <div class="col form-inline text-right">
+            <div class="form-group">
+              <input type="text" class="form-control w100" id="input_speed" value="60">
+              <button type="button" class="btn btn-primary" onclick="sendSpeed()">Set speed</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row form-group w400">
+          <div class="col form-inline">
+            <div class="form-group">
+              <input type="text" class="form-control w100" id="input_delay_move" value="750">
+              <button type="button" class="btn btn-primary" onclick="saveMoveDelay()">Set Delay Move</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row form-group w400">
+          <div class="col form-inline">
+            <div class="form-group">
+              <input type="text" class="form-control w100" id="input_delay_turn" value="500">
+              <button type="button" class="btn btn-primary" onclick="saveTurnDelay()">Set Delay Turn</button>
+            </div>
+          </div>
+        </div>
+
+        <!--   typical movement delay   -->
+        <div class="row">
+          <div class="col text-left">
+            Movement delay:
+          </div>
+        </div>
+        <div class="row form-group">
+          <div class="col form-inline">
+            <input type="range" id="move-delay-slider" min="100" max="1000" step="100" value="100" oninput="updateMoveValue()">
+            <p id="move-delay-value">100</p>
+            <button type="button" class="btn btn-success" onclick="saveMoveDelay()">Save</button>
+          </div>
+        </div>
+
+        <!--   typical turn delay   -->
+        <div class="row">
+          <div class="col text-left">
+            Turn delay
+          </div>
+        </div>
+        <div class="row form-group">
+          <div class="col form-inline">
+            <input type="range" id="turn-delay-slider" min="100" max="1000" step="100" value="100" oninput="updateTurnValue()">
+            <p id="turn-delay-value">100</p>
+            <button type="button" class="btn btn-success" onclick="saveTurnDelay()">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script>
+  function startStream() {
+        const url = document.getElementById('command-server-url').value;
+        const port = document.getElementById('stream-port').value;
+        const fullUrl = `${url}:${port}/stream`;
+
+        document.getElementById('photo').src = fullUrl;
+        document.getElementById('photo').style.display = 'block';
+  }
+
+  async function takePhoto() {
+    try {
+      // Make a fetch request to the endpoint
+      const url = document.getElementById('command-server-url').value;
+      const port = document.getElementById('command-port').value;
+      const fullUrl = `${url}:${port}/photo`;
+
+      const response = await fetch(fullUrl);
+
+      // Check if the request was successful (status code 200)
+      if (response.ok) {
+        // Get the image data as a blob
+        const imageData = await response.blob();
+
+        // Create a Data URL from the blob
+        const imageUrl = URL.createObjectURL(imageData);
+
+        // Set the src attribute of the img element
+        document.getElementById('photo').src = imageUrl;
+        document.getElementById('photo').style.display = 'block';
+      } else {
+        console.error(`Failed to fetch photo. Status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error fetching photo:', error);
+    }
+  }
+
+  function sendSpeed() {
+    const speed = document.getElementById("input_speed").value;
+    sendCommand("/speed/" + speed);
+  }
+
+  function saveMoveDelay() {
+    delay = document.getElementById("move-delay-slider").value;
+    sendCommand("delayMove/" + delay);
+  }
+
+  function saveTurnDelay() {
+    delay = document.getElementById("turn-delay-slider").value;
+    sendCommand("delayTurn/" + delay);
+  }
+
+  function sendCommand(endpoint) {
+    const url = document.getElementById('command-server-url').value;
+    const port = document.getElementById('command-port').value;
+    const fullURL = `${url}:${port}/${endpoint}`;
+
+    document.getElementById('loading-gif').style.display = 'block';
+    const headers = new Headers();
+    headers.append("ngrok-skip-browser-warning", "skip");
+
+    fetch(fullURL, {
+      headers,
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Error in the request.');
+        }
+        console.log('Command was sent:', fullURL);
+      })
+      .catch(error => {
+        console.error('Error sending the command:', error);
+      })
+      .finally(() => {
+        hideLoading();
+      });
+  }
+
+  setUpKeyboardShortcuts();
+
+  function hideLoading() {
+    document.getElementById('loading-gif').style.display = 'none';
+  }
+
+  function setUpKeyboardShortcuts() {
+    document.addEventListener('keydown', (event) => {
+      switch (event.key) {
+        case 'ArrowUp':
+          sendCommand('forward');
+          break;
+        case 'ArrowDown':
+          sendCommand('backward');
+          break;
+        case 'ArrowLeft':
+          sendCommand('left');
+          break;
+        case 'ArrowRight':
+          sendCommand('right');
+          break;
+      }
+    });
+  }
+
+  function updateTurnValue() {
+    const slider = document.getElementById("turn-delay-slider");
+    const selectedValueElement = document.getElementById("turn-delay-value");
+    const selectedValue = slider.value;
+    selectedValueElement.textContent = selectedValue;
+  }
+
+  function updateMoveValue() {
+    const slider = document.getElementById("move-delay-slider");
+    const selectedValueElement = document.getElementById("move-delay-value");
+    const selectedValue = slider.value;
+    selectedValueElement.textContent = selectedValue;
+  }
+
+</script>
+
+<!-- Bootstrap JS and Popper.js (required for Bootstrap) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
